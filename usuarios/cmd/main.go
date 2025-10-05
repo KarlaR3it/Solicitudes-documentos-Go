@@ -1,3 +1,5 @@
+// Para compilar: go run cmd/main.go
+
 package main
 
 import (

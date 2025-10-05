@@ -26,7 +26,7 @@ type CreateReq struct {
 	EmailUsuario  string `json:"email_usuario" binding:"required,email"`
 	Nombre        string `json:"nombre" binding:"required"`
 	Apellidos     string `json:"apellidos" binding:"required"`
-	Idioma        string `json:"idioma"`
+	Idioma        string `json:"idioma" `
 	ZonaHoraria   string `json:"zona_horaria"`
 }
 
