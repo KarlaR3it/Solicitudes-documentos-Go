@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/kramirez/usuarios-service/internal/domain"
+	"github.com/kramirez/usuarios-service/internal/usuario"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -36,7 +36,7 @@ func DBConnection() (*gorm.DB, error) {
 
 	// Auto-migrate si DATABASE_MIGRATE está en "up"
 	if os.Getenv("DATABASE_MIGRATE") == "up" {
-		if err := db.AutoMigrate(&domain.Usuario{}); err != nil {
+		if err := db.AutoMigrate(&usuario.Usuario{}); err != nil {
 			return nil, fmt.Errorf("error al realizar migraciones: %v", err)
 		}
 		log.Println("Migrations completed successfully")

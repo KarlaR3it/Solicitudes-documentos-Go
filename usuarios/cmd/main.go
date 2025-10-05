@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/kramirez/usuarios-service/internal/usuario"
 	"github.com/kramirez/usuarios-service/pkg/bootstrap"
@@ -22,8 +24,25 @@ func main() {
 	}
 
 	logger.Println("Base de datos conectada exitosamente")
-	logger.Println("Servicio de usuarios iniciado")")
 
-	// Mantener el servicio corriendo
-	select {}
+	// Inicializar capas
+	repo := usuario.NewRepository(db)
+	service := usuario.NewService(repo, logger)
+	endpoint := usuario.NewEndpoint(service)
+
+	// Configurar rutas
+	router := handler.SetupRoutes(endpoint)
+
+	// Obtener puerto del servicio
+	port := os.Getenv("SERVICE_PORT")
+	if port == "" {
+		port = "8081"
+	}
+
+	logger.Printf("Servicio de usuarios iniciado en el puerto %s", port)
+
+	// Iniciar servidor
+	if err := router.Run(fmt.Sprintf(":%s", port)); err != nil {
+		log.Fatal("Error al iniciar el servidor:", err)
+	}
 }
