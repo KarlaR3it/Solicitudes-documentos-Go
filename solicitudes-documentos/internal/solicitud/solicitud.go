@@ -22,7 +22,8 @@ type Solicitud struct {
 	FechaInicioProyecto      time.Time `gorm:"type:date;not null" json:"fecha_inicio_proyecto"`
 	CreatedAt                time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt                time.Time `gorm:"autoUpdateTime" json:"updated_at"`
-	UsuarioID                uint      `gorm:"not null" json:"usuario_id"`
+	// CASCADE: Cuando se elimine un usuario, se eliminarán automáticamente todas sus solicitudes
+	UsuarioID                uint      `gorm:"not null;constraint:OnDelete:CASCADE" json:"usuario_id"`
 }
 
 // TableName especifica el nombre de la tabla
