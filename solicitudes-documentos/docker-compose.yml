@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  solicitudes-documentos-db:
+    image: mysql:8.0
+    container_name: solicitudes_documentos_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    ports:
+      - "${DB_PORT}:3306"
+    volumes:
+      - solicitudes_data:/var/lib/mysql
+    networks:
+      - solicitudes-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  solicitudes_data:
+
+networks:
+  solicitudes-network:
+    driver: bridge
