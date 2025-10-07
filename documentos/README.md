@@ -167,20 +167,33 @@ Vamos a probar los endpoints principales del servicio de documentos.
            "solicitud_id": 1
        }
        ```
-   - Haz clic en "Send"
    - Deberías recibir una respuesta con el documento creado
 
 3. **Otras operaciones que puedes probar**:
    - **Listar todos los documentos**: `GET http://localhost:8083/documentos`
    - **Obtener un documento por ID**: `GET http://localhost:8083/documentos/1`
-   - **Actualizar un documento**: `PATCH http://localhost:8083/documentos/1` con un body similar al de creación, pero puedes editar solo algunos valores y no obligatoriamente todos.
-   - **Eliminar un documento**: `DELETE http://localhost:8083/documentos/1`
+   - **Actualizar un documento**:
+     ```http
+     PATCH http://localhost:8083/documentos/1
+     Content-Type: application/json
+     
+     {
+         "extension": "doc",
+         "nombre_archivo": "CV_prof"
+     }
+     ```
+     > 💡 Puedes actualizar solo los campos que necesites, no es necesario enviar todos los campos.
+
+   - **Eliminar un documento**:
+     ```http
+     DELETE http://localhost:8083/documentos/1
+     ```
 
    Recuerda reemplazar `1` por el ID real del documento que quieras consultar, actualizar o eliminar.
 
 ## 📚 Endpoints Disponibles
 
-| Método | Ruta | Descripción | Ejemplo de Uso |
+{{ ... }}
 |--------|------|-------------|----------------|
 | `GET`  | `/documentos` | Lista todos los documentos | `GET http://localhost:8083/documentos` |
 | `GET`  | `/documentos/1` | Obtiene un documento por ID | `GET http://localhost:8083/documentos/1` |
