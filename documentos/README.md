@@ -184,7 +184,7 @@ Vamos a probar los endpoints principales del servicio de documentos.
 3. **Otras operaciones que puedes probar**:
    - **Listar todos los documentos**: `GET http://localhost:8083/documentos`
    - **Obtener un documento por ID**: `GET http://localhost:8083/documentos/1`
-   - **Actualizar un documento**: `PUT http://localhost:8083/documentos/1` con un body similar al de creación
+   - **Actualizar un documento**: `PATCH http://localhost:8083/documentos/1` con un body similar al de creación, pero puedes editar solo algunos valores y no obligatoriamente todos.
    - **Eliminar un documento**: `DELETE http://localhost:8083/documentos/1`
 
    Recuerda reemplazar `1` por el ID real del documento que quieras consultar, actualizar o eliminar.
