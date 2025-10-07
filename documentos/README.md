@@ -1,50 +1,30 @@
-# 📄 Documentos Service
+# 📄 Microservicio de Documentos
 
-## 👋 ¡Bienvenid@!
-Este documento te guiará paso a paso para configurar y ejecutar el servicio de gestión de documentos.
+Este microservicio se encarga de la gestión de documentos adjuntos en el sistema. Es parte de la arquitectura de microservicios del proyecto.
 
-## 📋 ¿Qué es este proyecto?
+## 🚀 Empezando
 
-Este es un **microservicio** diseñado para la gestión de documentos. Proporciona una **API REST** que permite:
+### Requisitos Previos
 
-- Crear, leer, actualizar y eliminar documentos
-- Almacenar información en una base de datos MySQL
-- Integrarse con otros servicios mediante HTTP
+Asegúrate de tener instalados los requisitos generales del proyecto principal. Consulta el [README principal](../../README.md) para más detalles.
 
-### Características principales:
-- **Arquitectura de microservicios**: Desplegable de forma independiente
-- **API RESTful**: Interfaz estándar para integración
-- **Base de datos MySQL**: Almacenamiento persistente de documentos
-- **Configuración mediante variables de entorno**: Fácil despliegue en diferentes entornos
+### Configuración del Proyecto
 
-## 🛠️ Requisitos Previos
+1. **Configura las variables de entorno**:
+   - Copia el archivo `.env.example` a `.env`
+   - Edita el archivo `.env` según tu configuración
 
-Antes de comenzar, necesitarás instalar estas herramientas en tu computadora:
+2. **Variables de entorno principales**:
+   ```
+   DB_HOST=db
+   DB_PORT=3306
+   DB_USER=root
+   DB_PASSWORD=root
+   DB_NAME=documentos_db
+   SERVICE_PORT=8083
+   ```
 
-1. **Git** - Para descargar el código
-   - [Descargar Git para Windows](https://git-scm.com/download/win)
-   - Al instalar, selecciona "Git from the command line and also from 3rd-party software"
-   - Para verificar que se instaló correctamente, abre una nueva ventana de PowerShell y escribe:
-     ```bash
-     git --version
-     ```
-     Deberías ver un número de versión (ejemplo: git version 2.40.0).
-
-2. **Docker Desktop** - Para ejecutar la base de datos y la aplicación
-   - [Descargar Docker Desktop para Windows](https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe)
-   - Sigue las instrucciones del instalador
-   - Después de instalar, reinicia tu computadora
-   - Abre Docker Desktop para iniciar Docker
-   - Para verificar que Docker está funcionando, abre PowerShell y escribe:
-     ```bash
-     docker --version
-     docker-compose --version
-     ```
-     Deberías ver números de versión para ambos comandos.
-
-## 🚀 Empecemos: Guía Paso a Paso
-
-### 1. Obtener el Código
+### 1. Iniciar la Aplicación
 
 1. **Abre PowerShell** (presiona `Windows + X` y selecciona "Windows PowerShell")
 2. **Navega a la carpeta donde quieres guardar el proyecto**, por ejemplo:
@@ -204,6 +184,14 @@ Vamos a probar los endpoints principales del servicio de documentos.
      ```
 
    Recuerda reemplazar `1` por el ID real del documento que quieras consultar, actualizar o eliminar.
+
+## 🔐 Autenticación
+
+> **Nota**: Actualmente, la autenticación está en desarrollo. Para probar los endpoints, asegúrate de incluir el siguiente ID de usuario en el cuerpo de tus peticiones:
+> 
+> ```json
+> "usuario_id": 1
+> ```
 
 ## 📚 Endpoints Disponibles
 
