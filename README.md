@@ -53,25 +53,3 @@ solicitudes-Go/
 ├── go.work         # Archivo de espacio de trabajo de Go
 └── go.work.sum     # Suma de verificación de dependencias
 ```
-
-## 🔄 Despliegue
-
-Cada microservicio puede ser desplegado de forma independiente. Consulta la documentación de cada uno para más detalles.
-
-## 🤝 Contribución
-
-1. Haz un fork del proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Haz commit de tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Haz push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
-## 📄 Licencia
-
-Distribuido bajo la Licencia MIT. Ver `LICENSE` para más información.
-
-## 📞 Contacto
-
-[Tu Nombre] - [@tuemail@ejemplo.com](mailto:tuemail@ejemplo.com)
-
-Enlace del Proyecto: [https://github.com/tuusuario/solicitudes-Go](https://github.com/tuusuario/solicitudes-Go)
