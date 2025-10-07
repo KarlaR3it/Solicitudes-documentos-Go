@@ -64,32 +64,17 @@ Antes de comenzar, necesitarás instalar estas herramientas en tu computadora:
 
 ### 2. Configurar el Proyecto
 
-1. **Copia el archivo de configuración**:
-   - En Windows, usa este comando:
-     ```bash
-     copy .env.example .env
-     ```
-   - O si usas Git Bash o Linux/Mac:
-     ```bash
-     cp .env.example .env
-     ```
+1. **Configura las variables de entorno**:
+   - Abre el archivo `.env.example` que está en la raíz del proyecto
+   - Copia todo su contenido (Ctrl+A, Ctrl+C)
+   - Crea un nuevo archivo llamado `.env` en la misma carpeta
+   - Pega el contenido copiado (Ctrl+V)
+   - Guarda el archivo (Ctrl+S)
 
-2. **Abre el archivo `.env`** con tu editor de texto favorito (como Notepad, VS Code, etc.)
-   - Haz doble clic en el archivo `.env` en el Explorador de Windows
-   - O desde PowerShell:
-     ```bash
-     notepad .env
-     ```
-
-3. **Configura las variables** (los valores están bien así para comenzar, pero los puedes cambiar si es necesario):
-   ```
-   DB_HOST=db
-   DB_PORT=3306
-   DB_USER=root
-   DB_PASSWORD=root
-   DB_NAME=documentos_db
-   SERVICE_PORT=8083
-   ```
+2. **Edita el archivo `.env`** con tus credenciales:
+   - Abre el archivo `.env`
+   - Actualiza los valores según tu configuración (usuario, contraseña, etc.)
+   - Asegúrate de que los puertos no estén en uso por otras aplicaciones
 
 ### 3. Iniciar la Aplicación
 
@@ -107,7 +92,7 @@ Antes de comenzar, necesitarás instalar estas herramientas en tu computadora:
    docker-compose up --build
    ```
 
-   🔍 *Verás muchos mensajes en la pantalla - es normal, la aplicación se está iniciando.*
+   🔍 *La aplicación comenzará a iniciarse.*
 
 4. **Listo!** La aplicación está funcionando en:
    - [http://localhost:8083](http://localhost:8083)
@@ -211,7 +196,7 @@ Vamos a probar los endpoints principales del servicio de documentos.
 | `GET`  | `/documentos` | Lista todos los documentos | `GET http://localhost:8083/documentos` |
 | `GET`  | `/documentos/1` | Obtiene un documento por ID | `GET http://localhost:8083/documentos/1` |
 | `POST` | `/documentos` | Crea un nuevo documento | `POST http://localhost:8083/documentos` con body JSON |
-| `PUT`  | `/documentos/1` | Actualiza un documento | `PUT http://localhost:8083/documentos/1` con body JSON |
+| `PATCH`  | `/documentos/1` | Actualiza un documento | `PUT http://localhost:8083/documentos/1` con body JSON |
 | `DELETE` | `/documentos/1` | Elimina un documento | `DELETE http://localhost:8083/documentos/1` |
 
 
@@ -253,15 +238,3 @@ documentos/
 ├── .env.example   # Plantilla de configuración
 └── docker-compose.yml  # Configuración de Docker
 ```
-
-## 🔧 Variables de Entorno
-
-| Variable | Requerido | Descripción |
-|----------|-----------|-------------|
-| `DB_HOST` | ✅ | Dirección del servidor MySQL |
-| `DB_PORT` | ✅ | Puerto de MySQL (normalmente 3306) |
-| `DB_USER` | ✅ | Usuario de la base de datos |
-| `DB_PASSWORD` | ✅ | Contraseña del usuario |
-| `DB_NAME` | ✅ | Nombre de la base de datos |
-| `SERVICE_PORT` | ❌ | Puerto del servicio (por defecto: 8083) |
-| `SOLICITUDES_SERVICE_URL` | ❌ | URL del servicio de solicitudes |
