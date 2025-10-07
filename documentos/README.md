@@ -143,18 +143,7 @@ Antes de probar la creación de documentos, asegúrate de que exista una solicit
 
 Vamos a probar los endpoints principales del servicio de documentos.
 
-### Opción 1: Usando el Navegador (Solo para GET)
-
-1. **Verificar que el servicio está activo**:
-   - Abre tu navegador web favorito
-   - Ve a: [http://localhost:8083/health](http://localhost:8083/health)
-   - Deberías ver un mensaje que dice "OK"
-
-2. **Ver documentos existentes**:
-   - Ve a: [http://localhost:8083/documentos](http://localhost:8083/documentos)
-   - Al principio verás una lista vacía `[]`
-
-### Opción 2: Usando Postman (Recomendado para probar todos los métodos)
+### Usando Postman (Recomendado)
 
 1. **Descarga e instala Postman** (si no lo tienes):
    - [Descargar Postman](https://www.postman.com/downloads/)
