@@ -76,7 +76,21 @@ Antes de comenzar, necesitarás instalar estas herramientas en tu computadora:
    - Actualiza los valores según tu configuración (usuario, contraseña, etc.)
    - Asegúrate de que los puertos no estén en uso por otras aplicaciones
 
-### 3. Iniciar la Aplicación
+### 3. Configuración del Entorno
+
+1. **Configura las variables de entorno** (antes de iniciar los contenedores):
+   - Asegúrate de que el archivo `.env` tenga estos valores:
+     ```
+     DB_HOST=db
+     DB_PORT=3306
+     DB_USER=root
+     DB_PASSWORD=root
+     DB_NAME=documentos_db
+     SERVICE_PORT=8083
+     ```
+   - Estos valores son los predeterminados y deberían funcionar con la configuración de Docker Compose
+
+### 4. Iniciar la Aplicación
 
 1. **Abre Docker Desktop** (si no lo has hecho ya)
    - Busca "Docker Desktop" en el menú de inicio y ábrelo
