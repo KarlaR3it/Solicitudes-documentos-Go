@@ -1,4 +1,4 @@
-module github.com/kramirez/usuarios-service
+module github.com/kramirez/documentos
 
 go 1.25.1
 

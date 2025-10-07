@@ -23,7 +23,7 @@ func (e *Endpoint) Create(c *gin.Context) {
 		return
 	}
 
-	solicitud, err := e.service.Create(req)
+	solicitud, err := e.service.Create(c.Request.Context(), req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -68,7 +68,7 @@ func (e *Endpoint) GetAll(c *gin.Context) {
 		}
 	}
 
-	solicitudes, err := e.service.GetAll(filters)
+	solicitudes, err := e.service.GetAll(c.Request.Context(), filters)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -84,7 +84,7 @@ func (e *Endpoint) GetByID(c *gin.Context) {
 		return
 	}
 
-	solicitud, err := e.service.GetByID(uint(id))
+	solicitud, err := e.service.GetByID(c.Request.Context(), uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Solicitud no encontrada"})
 		return
@@ -106,7 +106,7 @@ func (e *Endpoint) Update(c *gin.Context) {
 		return
 	}
 
-	if err := e.service.Update(uint(id), req); err != nil {
+	if err := e.service.Update(c.Request.Context(), uint(id), req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -121,7 +121,7 @@ func (e *Endpoint) Delete(c *gin.Context){
 		return
 	}
 
-	if err := e.service.Delete(uint(id)); err != nil {
+	if err := e.service.Delete(c.Request.Context(), uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

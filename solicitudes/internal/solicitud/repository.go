@@ -1,15 +1,17 @@
 package solicitud
 
 import (
+	"context"
+
 	"gorm.io/gorm"
 )
 
 type Repository interface {
-	Create(solicitud *Solicitud) error
-	GetAll(filters GetAllReq) ([]Solicitud, error)
-	GetByID(id uint) (*Solicitud, error)
-	Update(id uint, req UpdateReq) error
-	Delete(id uint) error
+	Create(ctx context.Context, solicitud *Solicitud) error
+	GetAll(ctx context.Context, filters GetAllReq) ([]Solicitud, error)
+	GetByID(ctx context.Context, id uint) (*Solicitud, error)
+	Update(ctx context.Context, id uint, req UpdateReq) error
+	Delete(ctx context.Context, id uint) error
 }
 
 type repository struct {
@@ -20,13 +22,13 @@ func NewRepository(db *gorm.DB) Repository {
 	return &repository{db: db}
 }
 
-func (r *repository) Create(solicitud *Solicitud) error {
-	return r.db.Create(solicitud).Error
+func (r *repository) Create(ctx context.Context, solicitud *Solicitud) error {
+	return r.db.WithContext(ctx).Create(solicitud).Error
 }
 
-func (r *repository) GetAll(filters GetAllReq) ([]Solicitud, error) {
+func (r *repository) GetAll(ctx context.Context, filters GetAllReq) ([]Solicitud, error) {
 	var solicitudes []Solicitud
-	query := r.db.Model(&Solicitud{})
+	query := r.db.WithContext(ctx).Model(&Solicitud{})
 
 	//Aplicar filtros
 	if filters.Titulo != "" {
@@ -77,16 +79,16 @@ func (r *repository) GetAll(filters GetAllReq) ([]Solicitud, error) {
 
 }
 
-func (r *repository) GetByID(id uint) (*Solicitud, error) {
+func (r *repository) GetByID(ctx context.Context, id uint) (*Solicitud, error) {
 	var solicitud Solicitud
-	err := r.db.First(&solicitud, id).Error
+	err := r.db.WithContext(ctx).First(&solicitud, id).Error
 	if err != nil {
 		return nil, err
 	}
 	return &solicitud, nil
 }
 
-func (r *repository) Update(id uint, req UpdateReq) error {
+func (r *repository) Update(ctx context.Context, id uint, req UpdateReq) error {
 	updates := make(map[string]interface{})
 
 	if req.Titulo != nil {
@@ -122,9 +124,9 @@ func (r *repository) Update(id uint, req UpdateReq) error {
 	if req.FechaInicioProyecto != nil {
 		updates["fecha_inicio_proyecto"] = *req.FechaInicioProyecto
 	}
-	return r.db.Model(&Solicitud{}).Where("id = ?", id).Updates(updates).Error
+	return r.db.WithContext(ctx).Model(&Solicitud{}).Where("id = ?", id).Updates(updates).Error
 }
 
-func (r *repository) Delete(id uint) error {
-	return r.db.Delete(&Solicitud{}, id).Error
+func (r *repository) Delete(ctx context.Context, id uint) error {
+	return r.db.WithContext(ctx).Delete(&Solicitud{}, id).Error
 }

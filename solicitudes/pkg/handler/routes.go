@@ -2,7 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/kramirez/solicitudes-documentos/internal/solicitud"
+	"github.com/kramirez/solicitudes/internal/solicitud"
 )
 
 func SetupRoutes(endpoints *solicitud.Endpoint) *gin.Engine {

@@ -7,10 +7,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/kramirez/solicitudes-documentos/internal/solicitud"
-	"github.com/kramirez/solicitudes-documentos/pkg/bootstrap"
-	"github.com/kramirez/solicitudes-documentos/pkg/handler"
-	"github.com/kramirez/solicitudes-documentos/pkg/httpclient"
+    "github.com/kramirez/solicitudes/internal/solicitud"
+    "github.com/kramirez/solicitudes/pkg/bootstrap"
+    "github.com/kramirez/solicitudes/pkg/handler"
+    "github.com/kramirez/solicitudes/pkg/httpclient"
 )
 
 func main() {

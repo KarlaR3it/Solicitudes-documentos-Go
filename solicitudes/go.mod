@@ -1,4 +1,4 @@
-module github.com/kramirez/solicitudes-documentos
+module github.com/kramirez/solicitudes
 
 go 1.25.1
 

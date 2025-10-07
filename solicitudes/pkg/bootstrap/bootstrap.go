@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
-	"github.com/kramirez/solicitudes-documentos/internal/solicitud"
+    "github.com/joho/godotenv"
+    "github.com/kramirez/solicitudes/internal/solicitud"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )

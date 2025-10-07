@@ -1,35 +1,37 @@
 package solicitud
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
-	"github.com/kramirez/solicitudes-documentos/pkg/httpclient"
+
+    "github.com/kramirez/solicitudes/pkg/httpclient"
 )
 
 type Service interface {
-	Create(req CreateReq) (*Solicitud, error)
-	GetAll(filter GetAllReq) ([]Solicitud, error)
-	GetByID(id uint) (*Solicitud, error)
-	Update(id uint, req UpdateReq) error
-	Delete(id uint) error
+	Create(ctx context.Context, req CreateReq) (*Solicitud, error)
+	GetAll(ctx context.Context, filter GetAllReq) ([]Solicitud, error)
+	GetByID(ctx context.Context, id uint) (*Solicitud, error)
+	Update(ctx context.Context, id uint, req UpdateReq) error
+	Delete(ctx context.Context, id uint) error
 }
 
 type service struct {
-	repo Repository
-	logger *log.Logger
+	repo          Repository
+	logger        *log.Logger
 	usuarioClient *httpclient.UsuarioClient
 }
 
 func NewService(repo Repository, logger *log.Logger, usuarioClient *httpclient.UsuarioClient) Service {
 	return &service{
-		repo:   repo,
-		logger: logger,
+		repo:          repo,
+		logger:        logger,
 		usuarioClient: usuarioClient,
 	}
 }
 
-func (s *service) Create(req CreateReq) (*Solicitud, error) {
+func (s *service) Create(ctx context.Context, req CreateReq) (*Solicitud, error) {
 	// Validar que el usuario existe
 	existe, err := s.usuarioClient.ValidarUsuario(req.UsuarioID)
 	if err != nil {
@@ -67,52 +69,52 @@ func (s *service) Create(req CreateReq) (*Solicitud, error) {
 		UsuarioID:                req.UsuarioID,
 	}
 
-	if err := s.repo.Create(solicitud); err != nil {
+	if err := s.repo.Create(ctx, solicitud); err != nil {
 		s.logger.Printf("Error al crear la solicitud: %v", err)
 		return nil, err
 	}
-	
+
 	s.logger.Printf("Solicitud creada exitosamente: ID=%d para Usuario ID=%d", solicitud.ID, solicitud.UsuarioID)
 	return solicitud, nil
 }
 
-func (s *service) GetAll(filter GetAllReq) ([]Solicitud, error) {
-	solicitudes, err := s.repo.GetAll(filter)
+func (s *service) GetAll(ctx context.Context, filter GetAllReq) ([]Solicitud, error) {
+	solicitudes, err := s.repo.GetAll(ctx, filter)
 	if err != nil {
 		s.logger.Printf("Error al obtener las solicitudes: %v", err)
 		return nil, err
 	}
-	
+
 	s.logger.Printf("Se obtuvieron %d solicitudes", len(solicitudes))
 	return solicitudes, nil
 }
 
-func (s *service) GetByID(id uint) (*Solicitud, error) {
-	solicitud, err := s.repo.GetByID(id)
+func (s *service) GetByID(ctx context.Context, id uint) (*Solicitud, error) {
+	solicitud, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		s.logger.Printf("Error al obtener la solicitud ID=%d: %v", id, err)
 		return nil, err
 	}
-	
+
 	return solicitud, nil
 }
 
-func (s *service) Update(id uint, req UpdateReq) error {
-	if err := s.repo.Update(id, req); err != nil {
+func (s *service) Update(ctx context.Context, id uint, req UpdateReq) error {
+	if err := s.repo.Update(ctx, id, req); err != nil {
 		s.logger.Printf("Error al actualizar la solicitud ID=%d: %v", id, err)
 		return err
 	}
-	
+
 	s.logger.Printf("Solicitud actualizada exitosamente: ID=%d", id)
 	return nil
 }
 
-func (s *service) Delete(id uint) error {
-	if err := s.repo.Delete(id); err != nil {
+func (s *service) Delete(ctx context.Context, id uint) error {
+	if err := s.repo.Delete(ctx, id); err != nil {
 		s.logger.Printf("Error al eliminar la solicitud ID=%d: %v", id, err)
 		return err
 	}
-	
+
 	s.logger.Printf("Solicitud eliminada exitosamente: ID=%d", id)
 	return nil
 }
