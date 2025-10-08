@@ -13,7 +13,8 @@ func SetupRoutes(endpoints *solicitud.Endpoint) *gin.Engine {
 	{
 		solicitudGroup.POST("", endpoints.Create)
 		solicitudGroup.GET("", endpoints.GetAll)
-		solicitudGroup.GET("/:id", endpoints.GetByID)
+		solicitudGroup.GET("/:id", endpoints.GetByID) // Obtiene solo la información básica
+		solicitudGroup.GET("/:id/con-documentos", endpoints.GetByIDWithDocuments) // Obtiene la solicitud con sus documentos
 		solicitudGroup.PATCH("/:id", endpoints.Update)
 		solicitudGroup.DELETE("/:id", endpoints.Delete)
 	}

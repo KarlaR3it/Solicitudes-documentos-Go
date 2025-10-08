@@ -89,6 +89,24 @@ func (e *Endpoint) GetByID(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Solicitud no encontrada"})
 		return
 	}
+
+	c.JSON(http.StatusOK, solicitud)
+}
+
+// GetByIDWithDocuments maneja GET /solicitudes/:id/con-documentos
+func (e *Endpoint) GetByIDWithDocuments(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido"})
+		return
+	}
+
+	solicitud, err := e.service.GetByIDWithDocuments(c.Request.Context(), uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Solicitud no encontrada"})
+		return
+	}
+
 	c.JSON(http.StatusOK, solicitud)
 }
 
@@ -110,6 +128,7 @@ func (e *Endpoint) Update(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Solicitud actualizada exitosamente"})
 }
 

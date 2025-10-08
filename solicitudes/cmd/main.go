@@ -28,17 +28,16 @@ func main() {
 
 	logger.Println("Base de datos conectada exitosamente")
 
-	//Inicializar cliente HTTP para el servicio de usuarios
-	usuariosServiceURL := os.Getenv("USUARIOS_SERVICE_URL")
-	if usuariosServiceURL == "" {
-		usuariosServiceURL = "http://localhost:8081"
-	}
-	usuarioClient := httpclient.NewUsuarioClient(usuariosServiceURL)
-	logger.Printf("Cliente de usuarios configurado: %s", usuariosServiceURL)
+	// Crear cliente para el microservicio de documentos
+	documentoClient := httpclient.NewDocumentoClient("http://localhost:8083")
 
-	//Inicializar capas
-	repo := solicitud.NewRepository(db)
-	service := solicitud.NewService(repo, logger, usuarioClient)
+	// Inicializar repositorio
+	solicitudRepo := solicitud.NewRepository(db)
+
+	// Inicializar servicio con el cliente de documentos
+	service := solicitud.NewService(solicitudRepo, logger, documentoClient)
+
+	// Inicializar endpoint
 	endpoint := solicitud.NewEndpoint(service)
 
 	//Configurar rutas

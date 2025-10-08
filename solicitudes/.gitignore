@@ -17,8 +17,8 @@ vendor/
 # Environment variables
 .env
 
-# Ignorar el directorio httpclient
-pkg/httpclient/
+# Ignorar archivo específico de usuario
+pkg/httpclient/usuario_client.go
 
 # IDE specific files
 .idea/

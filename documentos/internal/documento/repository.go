@@ -37,6 +37,10 @@ func (r *repository) GetAll(ctx context.Context, filters GetAllReq) ([]Documento
 	if filters.NombreArchivo != "" {
 		query = query.Where("nombre_archivo LIKE ?", "%"+filters.NombreArchivo+"%")
 	}
+	// NUEVO: Filtrar por solicitud_id
+	if filters.SolicitudID > 0 {
+		query = query.Where("solicitud_id = ?", filters.SolicitudID)
+	}
 
 	//Paginacion
 	if filters.Limit > 0 {

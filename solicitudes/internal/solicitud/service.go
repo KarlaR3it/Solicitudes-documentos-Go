@@ -5,44 +5,37 @@ import (
 	"fmt"
 	"log"
 	"time"
-
-    "github.com/kramirez/solicitudes/pkg/httpclient"
 )
 
 type Service interface {
 	Create(ctx context.Context, req CreateReq) (*Solicitud, error)
-	GetAll(ctx context.Context, filter GetAllReq) ([]Solicitud, error)
-	GetByID(ctx context.Context, id uint) (*Solicitud, error)
+	GetAll(ctx context.Context, filter GetAllReq) ([]SolicitudResponse, error)
+	GetByID(ctx context.Context, id uint) (*SolicitudResponse, error)
+	GetByIDWithDocuments(ctx context.Context, id uint) (*SolicitudResponse, error) // New method
 	Update(ctx context.Context, id uint, req UpdateReq) error
 	Delete(ctx context.Context, id uint) error
+}
+
+// DocumentoClient define la interfaz para el cliente de documentos
+type DocumentoClient interface {
+	GetBySolicitudID(solicitudID uint) ([]Documento, error)
 }
 
 type service struct {
 	repo          Repository
 	logger        *log.Logger
-	usuarioClient *httpclient.UsuarioClient
+	documentoClient DocumentoClient
 }
 
-func NewService(repo Repository, logger *log.Logger, usuarioClient *httpclient.UsuarioClient) Service {
+func NewService(repo Repository, logger *log.Logger, docClient DocumentoClient) Service {
 	return &service{
 		repo:          repo,
 		logger:        logger,
-		usuarioClient: usuarioClient,
+		documentoClient: docClient,
 	}
 }
 
 func (s *service) Create(ctx context.Context, req CreateReq) (*Solicitud, error) {
-	// Validar que el usuario existe
-	existe, err := s.usuarioClient.ValidarUsuario(req.UsuarioID)
-	if err != nil {
-		s.logger.Printf("Error al validar usuario ID=%d: %v", req.UsuarioID, err)
-		return nil, fmt.Errorf("error al validar usuario: %v", err)
-	}
-	if !existe {
-		s.logger.Printf("Usuario ID=%d no encontrado", req.UsuarioID)
-		return nil, fmt.Errorf("el usuario con ID %d no existe", req.UsuarioID)
-	}
-
 	// Parsear la fecha de string a time.Time
 	fechaInicio, err := time.Parse("2006-01-02", req.FechaInicioProyecto)
 	if err != nil {
@@ -78,25 +71,87 @@ func (s *service) Create(ctx context.Context, req CreateReq) (*Solicitud, error)
 	return solicitud, nil
 }
 
-func (s *service) GetAll(ctx context.Context, filter GetAllReq) ([]Solicitud, error) {
+func (s *service) GetAll(ctx context.Context, filter GetAllReq) ([]SolicitudResponse, error) {
 	solicitudes, err := s.repo.GetAll(ctx, filter)
 	if err != nil {
 		s.logger.Printf("Error al obtener las solicitudes: %v", err)
 		return nil, err
 	}
 
-	s.logger.Printf("Se obtuvieron %d solicitudes", len(solicitudes))
-	return solicitudes, nil
-}
+	// Inicializar el slice de respuestas
+	responses := make([]SolicitudResponse, len(solicitudes))
 
-func (s *service) GetByID(ctx context.Context, id uint) (*Solicitud, error) {
-	solicitud, err := s.repo.GetByID(ctx, id)
-	if err != nil {
-		s.logger.Printf("Error al obtener la solicitud ID=%d: %v", id, err)
-		return nil, err
+	for i, solicitud := range solicitudes {
+		// Convertir a respuesta básica primero
+		responses[i] = solicitud.ToResponse()
+		
+		// Obtener documentos del microservicio
+		documentos, err := s.documentoClient.GetBySolicitudID(solicitud.ID)
+		if err != nil {
+			s.logger.Printf("Advertencia: No se pudieron obtener documentos para solicitud ID=%d: %v", solicitud.ID, err)
+			responses[i].Documentos = []DocumentoResponse{}
+		} else {
+			// Mapear documentos a DocumentoResponse (solo información básica)
+			docResponses := make([]DocumentoResponse, len(documentos))
+			for j, doc := range documentos {
+				docResponses[j] = DocumentoResponse{
+					ID:            doc.ID,
+					NombreArchivo: doc.NombreArchivo,
+					Extension:     doc.Extension,
+				}
+			}
+			responses[i].Documentos = docResponses
+		}
 	}
 
-	return solicitud, nil
+	s.logger.Printf("Se obtuvieron %d solicitudes", len(responses))
+	return responses, nil
+
+	s.logger.Printf("Se obtuvieron %d solicitudes", len(responses))
+	return responses, nil
+}
+
+func (s *service) GetByID(ctx context.Context, id uint) (*SolicitudResponse, error) {
+	solicitud, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		s.logger.Printf("Error al obtener solicitud ID=%d: %v", id, err)
+		return nil, fmt.Errorf("error al obtener la solicitud: %v", err)
+	}
+
+	// Devolver solo la información básica, sin documentos
+	response := solicitud.ToResponse()
+	response.Documentos = []DocumentoResponse{}
+
+	return &response, nil
+}
+
+// GetByIDWithDocuments obtiene una solicitud con sus documentos asociados
+func (s *service) GetByIDWithDocuments(ctx context.Context, id uint) (*SolicitudResponse, error) {
+	solicitud, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		s.logger.Printf("Error al obtener solicitud ID=%d: %v", id, err)
+		return nil, fmt.Errorf("error al obtener la solicitud: %v", err)
+	}
+
+	response := solicitud.ToResponse()
+	
+	// Obtener documentos del microservicio
+	documentos, err := s.documentoClient.GetBySolicitudID(solicitud.ID)
+	if err != nil {
+		s.logger.Printf("Advertencia: No se pudieron obtener documentos para solicitud ID=%d: %v", solicitud.ID, err)
+		response.Documentos = []DocumentoResponse{}
+	} else {
+		response.Documentos = make([]DocumentoResponse, len(documentos))
+		for i, doc := range documentos {
+			response.Documentos[i] = DocumentoResponse{
+				ID:            doc.ID,
+				NombreArchivo: doc.NombreArchivo,
+				Extension:     doc.Extension,
+			}
+		}
+	}
+
+	return &response, nil
 }
 
 func (s *service) Update(ctx context.Context, id uint, req UpdateReq) error {

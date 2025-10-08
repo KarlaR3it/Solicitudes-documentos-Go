@@ -38,7 +38,14 @@ func (e *Endpoint) GetAll(c *gin.Context) {
 		NombreArchivo: c.Query("nombre_archivo"),
 	}
 
-	//Paginacion
+	// Convertir solicitud_id
+	if solicitudID := c.Query("solicitud_id"); solicitudID != "" {
+		if sid, err := strconv.Atoi(solicitudID); err == nil {
+			filters.SolicitudID = uint(sid)
+		}
+	}
+
+	// Paginacion
 	if limit := c.Query("limit"); limit != "" {
 		if l, err := strconv.Atoi(limit); err == nil {
 			filters.Limit = l
