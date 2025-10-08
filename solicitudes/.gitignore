@@ -17,9 +17,12 @@ vendor/
 # Environment variables
 .env
 
+# Ignorar el directorio httpclient
+pkg/httpclient/
+
 # IDE specific files
 .idea/
-.vscode/
+vscode/
 *.swp
 *.swo
 
