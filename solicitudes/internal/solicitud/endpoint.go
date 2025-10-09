@@ -1,6 +1,7 @@
 package solicitud
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -118,8 +119,32 @@ func (e *Endpoint) Update(c *gin.Context) {
 		return
 	}
 
+	// Leer el body una sola vez
+	bodyBytes, err := c.GetRawData()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Verificar campos no permitidos
+	var rawBody map[string]interface{}
+	if err := json.Unmarshal(bodyBytes, &rawBody); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Validar que no se intenten actualizar campos no permitidos
+	forbiddenFields := []string{"usuario_id", "id", "created_at", "updated_at"}
+	for _, field := range forbiddenFields {
+		if _, exists := rawBody[field]; exists {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Campo '" + field + "' no puede ser actualizado"})
+			return
+		}
+	}
+
+	// Parsear con la estructura correcta
 	var req UpdateReq
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := json.Unmarshal(bodyBytes, &req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -132,8 +157,8 @@ func (e *Endpoint) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Solicitud actualizada exitosamente"})
 }
 
-//Delete, maneja DELETE /solicitudes/:id
-func (e *Endpoint) Delete(c *gin.Context){
+// Delete, maneja DELETE /solicitudes/:id
+func (e *Endpoint) Delete(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido"})

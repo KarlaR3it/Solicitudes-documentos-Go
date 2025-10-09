@@ -7,10 +7,10 @@ import (
 	"log"
 	"os"
 
-    "github.com/kramirez/solicitudes/internal/solicitud"
-    "github.com/kramirez/solicitudes/pkg/bootstrap"
-    "github.com/kramirez/solicitudes/pkg/handler"
-    "github.com/kramirez/solicitudes/pkg/httpclient"
+	"github.com/kramirez/solicitudes/internal/solicitud"
+	"github.com/kramirez/solicitudes/pkg/bootstrap"
+	"github.com/kramirez/solicitudes/pkg/handler"
+	"github.com/kramirez/solicitudes/pkg/httpclient"
 )
 
 func main() {
@@ -23,7 +23,8 @@ func main() {
 	//Conectar a la base de datos
 	db, err := bootstrap.DBConnection()
 	if err != nil {
-		log.Fatal("Error al conectar a la base de datos", err)
+		log.Printf("Error al conectar a la base de datos: %v", err)
+		log.Fatal("No se puede continuar sin conexión a la base de datos")
 	}
 
 	logger.Println("Base de datos conectada exitosamente")

@@ -22,15 +22,15 @@ type DocumentoClient interface {
 }
 
 type service struct {
-	repo          Repository
-	logger        *log.Logger
+	repo            Repository
+	logger          *log.Logger
 	documentoClient DocumentoClient
 }
 
 func NewService(repo Repository, logger *log.Logger, docClient DocumentoClient) Service {
 	return &service{
-		repo:          repo,
-		logger:        logger,
+		repo:            repo,
+		logger:          logger,
 		documentoClient: docClient,
 	}
 }
@@ -84,7 +84,7 @@ func (s *service) GetAll(ctx context.Context, filter GetAllReq) ([]SolicitudResp
 	for i, solicitud := range solicitudes {
 		// Convertir a respuesta básica primero
 		responses[i] = solicitud.ToResponse()
-		
+
 		// Obtener documentos del microservicio
 		documentos, err := s.documentoClient.GetBySolicitudID(solicitud.ID)
 		if err != nil {
@@ -134,7 +134,7 @@ func (s *service) GetByIDWithDocuments(ctx context.Context, id uint) (*Solicitud
 	}
 
 	response := solicitud.ToResponse()
-	
+
 	// Obtener documentos del microservicio
 	documentos, err := s.documentoClient.GetBySolicitudID(solicitud.ID)
 	if err != nil {
@@ -155,6 +155,13 @@ func (s *service) GetByIDWithDocuments(ctx context.Context, id uint) (*Solicitud
 }
 
 func (s *service) Update(ctx context.Context, id uint, req UpdateReq) error {
+	// Verificar que la solicitud exista antes de actualizar
+	_, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		s.logger.Printf("Error al buscar solicitud ID=%d: %v", id, err)
+		return fmt.Errorf("solicitud no encontrada")
+	}
+
 	if err := s.repo.Update(ctx, id, req); err != nil {
 		s.logger.Printf("Error al actualizar la solicitud ID=%d: %v", id, err)
 		return err
@@ -165,6 +172,13 @@ func (s *service) Update(ctx context.Context, id uint, req UpdateReq) error {
 }
 
 func (s *service) Delete(ctx context.Context, id uint) error {
+	// Verificar que la solicitud exista antes de eliminar
+	_, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		s.logger.Printf("Error al buscar solicitud ID=%d: %v", id, err)
+		return fmt.Errorf("solicitud no encontrada")
+	}
+
 	if err := s.repo.Delete(ctx, id); err != nil {
 		s.logger.Printf("Error al eliminar la solicitud ID=%d: %v", id, err)
 		return err

@@ -1,6 +1,7 @@
 package documento
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -89,10 +90,33 @@ func (e *Endpoint) Update(c *gin.Context) {
 		return
 	}
 
-	var req UpdateReq
-	if err := c.ShouldBindJSON(&req); err != nil {
+	// Validar campos prohibidos
+	var rawReq map[string]interface{}
+	if err := c.ShouldBindJSON(&rawReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+
+	// Lista de campos que no se pueden actualizar
+	forbiddenFields := []string{"id", "created_at", "updated_at", "solicitud_id"}
+	for _, field := range forbiddenFields {
+		if _, exists := rawReq[field]; exists {
+			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Campo '%s' no puede ser actualizado", field)})
+			return
+		}
+	}
+
+	// Convertir a UpdateReq
+	var req UpdateReq
+	if rawReq["extension"] != nil {
+		if ext, ok := rawReq["extension"].(string); ok {
+			req.Extension = &ext
+		}
+	}
+	if rawReq["nombre_archivo"] != nil {
+		if nombre, ok := rawReq["nombre_archivo"].(string); ok {
+			req.NombreArchivo = &nombre
+		}
 	}
 
 	if err := e.service.Update(c.Request.Context(), uint(id), req); err != nil {

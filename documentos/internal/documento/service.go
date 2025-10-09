@@ -130,6 +130,13 @@ func (s *service) GetByID(ctx context.Context, id uint) (*DocumentoResponse, err
 }
 
 func (s *service) Update(ctx context.Context, id uint, req UpdateReq) error {
+	// Verificar que el documento existe
+	_, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		s.logger.Printf("Documento no encontrado para actualizar: ID=%d", id)
+		return fmt.Errorf("documento no encontrado")
+	}
+
 	if err := s.repo.Update(ctx, id, req); err != nil {
 		s.logger.Printf("Error al actualizar el documento ID=%d: %v", id, err)
 		return err
@@ -140,6 +147,13 @@ func (s *service) Update(ctx context.Context, id uint, req UpdateReq) error {
 }
 
 func (s *service) Delete(ctx context.Context, id uint) error {
+	// Verificar que el documento existe
+	_, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		s.logger.Printf("Documento no encontrado para eliminar: ID=%d", id)
+		return fmt.Errorf("documento no encontrado")
+	}
+
 	if err := s.repo.Delete(ctx, id); err != nil {
 		s.logger.Printf("Error al eliminar el documento ID=%d: %v", id, err)
 		return err
