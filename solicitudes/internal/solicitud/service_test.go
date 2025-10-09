@@ -88,26 +88,27 @@ func TestService_Create(t *testing.T) {
 	ctx := context.Background()
 	logger := log.New(os.Stdout, "TEST: ", log.LstdFlags)
 
-	t.Run("debe crear solicitud exitosamente", func(t *testing.T) {
-		// Arrange
-		req := CreateReq{
-			Titulo:                   "Nueva Solicitud",
-			Estado:                   "pendiente",
-			Area:                     "TI",
-			Pais:                     "Chile",
-			Localizacion:             "Santiago",
-			NumeroVacantes:           1,
-			Descripcion:              "Descripción test",
-			BaseEducacional:          "Universitaria",
-			ConocimientosExcluyentes: "Ninguno",
-			RentaDesde:               800000,
-			RentaHasta:               1200000,
-			ModalidadTrabajo:         "remoto",
-			TipoServicio:             "freelance",
-			NivelExperiencia:         "junior",
-			FechaInicioProyecto:      "2024-01-01",
-		}
+	validRequest := CreateReq{
+		Titulo:                   "DevOps Engineer",
+		Estado:                   "pendiente",
+		Area:                     "Infraestructura",
+		Pais:                     "Chile",
+		Localizacion:             "Concepción",
+		NumeroVacantes:           1,
+		Descripcion:              "Ingeniero DevOps para automatizar procesos de CI/CD y gestionar infraestructura en la nube",
+		BaseEducacional:          "Ingeniería en Informática o experiencia equivalente demostrable",
+		ConocimientosExcluyentes: "AWS, Docker, Kubernetes, Jenkins, Terraform, Linux",
+		RentaDesde:               1500000,
+		RentaHasta:               2200000,
+		ModalidadTrabajo:         "presencial",
+		TipoServicio:             "infraestructura",
+		NivelExperiencia:         "senior",
+		FechaInicioProyecto:      "2025-12-01",
+		UsuarioID:                uintPtr(3),
+	}
 
+	t.Run("debe crear solicitud exitosamente con todos los campos", func(t *testing.T) {
+		// Arrange
 		repo := new(mockRepository)
 		docClient := new(mockDocumentoClient)
 
@@ -115,42 +116,27 @@ func TestService_Create(t *testing.T) {
 			Return(nil).
 			Run(func(args mock.Arguments) {
 				s := args.Get(1).(*Solicitud)
-				s.ID = 1 // Simular asignación de ID
+				s.ID = 1
 			})
 
 		service := NewService(repo, logger, docClient)
 
 		// Act
-		result, err := service.Create(ctx, req)
+		result, err := service.Create(ctx, validRequest)
 
 		// Assert
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
 		assert.Equal(t, uint(1), result.ID)
-		assert.Equal(t, "Nueva Solicitud", result.Titulo)
+		assert.Equal(t, validRequest.Titulo, result.Titulo)
+		assert.Equal(t, validRequest.Estado, result.Estado)
+		assert.Equal(t, validRequest.Area, result.Area)
+		assert.Equal(t, validRequest.RentaDesde, result.RentaDesde)
 		repo.AssertExpectations(t)
 	})
 
-	t.Run("debe retornar error cuando falla la creación", func(t *testing.T) {
+	t.Run("debe retornar error cuando falla la creación en el repositorio", func(t *testing.T) {
 		// Arrange
-		req := CreateReq{
-			Titulo:                   "Solicitud Fallida",
-			Estado:                   "pendiente",
-			Area:                     "TI",
-			Pais:                     "Chile",
-			Localizacion:             "Santiago",
-			NumeroVacantes:           1,
-			Descripcion:              "Descripción test",
-			BaseEducacional:          "Universitaria",
-			ConocimientosExcluyentes: "Ninguno",
-			RentaDesde:               800000,
-			RentaHasta:               1200000,
-			ModalidadTrabajo:         "remoto",
-			TipoServicio:             "freelance",
-			NivelExperiencia:         "junior",
-			FechaInicioProyecto:      "2024-01-01",
-		}
-
 		repo := new(mockRepository)
 		docClient := new(mockDocumentoClient)
 
@@ -160,12 +146,186 @@ func TestService_Create(t *testing.T) {
 		service := NewService(repo, logger, docClient)
 
 		// Act
-		result, err := service.Create(ctx, req)
+		result, err := service.Create(ctx, validRequest)
 
 		// Assert
 		assert.Error(t, err)
 		assert.Nil(t, result)
 		assert.EqualError(t, err, "error de base de datos")
+		repo.AssertExpectations(t)
+	})
+
+	t.Run("debe validar campos requeridos", func(t *testing.T) {
+		tests := []struct {
+			name       string
+			req        CreateReq
+			errMsg     string
+			setupMocks func(*mockRepository, *mockDocumentoClient)
+		}{
+			{
+				name: "falta título",
+				req: func() CreateReq {
+					r := validRequest
+					r.Titulo = ""
+					return r
+				}(),
+				errMsg: "el título es requerido",
+				setupMocks: func(r *mockRepository, d *mockDocumentoClient) {
+					// No se esperan llamadas al repositorio
+				},
+			},
+			{
+				name: "falta estado",
+				req: func() CreateReq {
+					r := validRequest
+					r.Estado = ""
+					return r
+				}(),
+				errMsg: "", // No debería fallar ya que tiene valor por defecto
+				setupMocks: func(r *mockRepository, d *mockDocumentoClient) {
+					r.On("Create", ctx, mock.AnythingOfType("*solicitud.Solicitud")).
+						Return(nil).
+						Run(func(args mock.Arguments) {
+							s := args.Get(1).(*Solicitud)
+							s.ID = 1
+						})
+				},
+			},
+			{
+				name: "fecha inválida",
+				req: func() CreateReq {
+					r := validRequest
+					r.FechaInicioProyecto = "fecha-invalida"
+					return r
+				}(),
+				errMsg: "formato de fecha inválido, debe ser YYYY-MM-DD",
+				setupMocks: func(r *mockRepository, d *mockDocumentoClient) {
+					// No se esperan llamadas al repositorio
+				},
+			},
+			{
+				name: "rango de renta inválido",
+				req: func() CreateReq {
+					r := validRequest
+					r.RentaDesde = 2000000
+					r.RentaHasta = 1000000
+					return r
+				}(),
+				errMsg: "el rango de renta es inválido",
+				setupMocks: func(r *mockRepository, d *mockDocumentoClient) {
+					// No se esperan llamadas al repositorio
+				},
+			},
+			{
+				name: "falta área",
+				req: func() CreateReq {
+					r := validRequest
+					r.Area = ""
+					return r
+				}(),
+				errMsg: "el área es requerida",
+				setupMocks: func(r *mockRepository, d *mockDocumentoClient) {
+					// No se esperan llamadas al repositorio
+				},
+			},
+			{
+				name: "falta país",
+				req: func() CreateReq {
+					r := validRequest
+					r.Pais = ""
+					return r
+				}(),
+				errMsg: "el país es requerido",
+				setupMocks: func(r *mockRepository, d *mockDocumentoClient) {
+					// No se esperan llamadas al repositorio
+				},
+			},
+			{
+				name: "falta localización",
+				req: func() CreateReq {
+					r := validRequest
+					r.Localizacion = ""
+					return r
+				}(),
+				errMsg: "la localización es requerida",
+				setupMocks: func(r *mockRepository, d *mockDocumentoClient) {
+					// No se esperan llamadas al repositorio
+				},
+			},
+			{
+				name: "falta ID de usuario",
+				req: func() CreateReq {
+					r := validRequest
+					r.UsuarioID = nil
+					return r
+				}(),
+				errMsg: "el ID de usuario es requerido",
+				setupMocks: func(r *mockRepository, d *mockDocumentoClient) {
+					// No se esperan llamadas al repositorio
+				},
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				// Arrange
+				repo := new(mockRepository)
+				docClient := new(mockDocumentoClient)
+				service := NewService(repo, logger, docClient)
+
+				// Configurar mocks si es necesario
+				if tt.setupMocks != nil {
+					tt.setupMocks(repo, docClient)
+				}
+
+				// Act
+				result, err := service.Create(ctx, tt.req)
+				
+				// Assert
+				if tt.errMsg != "" {
+					assert.Error(t, err)
+					assert.Nil(t, result)
+					assert.Contains(t, err.Error(), tt.errMsg)
+				} else {
+					assert.NoError(t, err)
+					assert.NotNil(t, result)
+				}
+
+				// Verificar que no se llamó al repositorio a menos que se espere
+				if tt.setupMocks == nil {
+					repo.AssertNotCalled(t, "Create", mock.Anything, mock.Anything)
+				} else {
+					repo.AssertExpectations(t)
+				}
+			})
+		}
+	})
+
+	t.Run("debe manejar valores por defecto correctamente", func(t *testing.T) {
+		req := validRequest
+		req.Estado = "" // Estado debería tener un valor por defecto
+
+		repo := new(mockRepository)
+		docClient := new(mockDocumentoClient)
+
+		repo.On("Create", ctx, mock.AnythingOfType("*solicitud.Solicitud")).
+			Return(nil).
+			Run(func(args mock.Arguments) {
+				s := args.Get(1).(*Solicitud)
+				s.ID = 1
+				// Verificar que el estado se haya establecido correctamente
+				assert.Equal(t, "pendiente", s.Estado, "El estado debería tener el valor por defecto 'pendiente'")
+			})
+
+		service := NewService(repo, logger, docClient)
+
+		// Act
+		result, err := service.Create(ctx, req)
+
+		// Assert
+		assert.NoError(t, err, "No debería haber error al crear la solicitud")
+		assert.NotNil(t, result, "El resultado no debería ser nulo")
+		assert.Equal(t, "pendiente", result.Estado, "El estado debería ser 'pendiente'")
 		repo.AssertExpectations(t)
 	})
 }
@@ -324,6 +484,9 @@ func TestService_Update(t *testing.T) {
 		repo := new(mockRepository)
 		docClient := new(mockDocumentoClient)
 
+		// Mock para verificar que existe la solicitud
+		existingSolicitud := &Solicitud{ID: 1, Titulo: "Original"}
+		repo.On("GetByID", ctx, uint(1)).Return(existingSolicitud, nil)
 		repo.On("Update", ctx, uint(1), updateReq).Return(nil)
 
 		service := NewService(repo, logger, docClient)
@@ -345,6 +508,9 @@ func TestService_Update(t *testing.T) {
 		repo := new(mockRepository)
 		docClient := new(mockDocumentoClient)
 
+		// Mock para verificar que existe la solicitud
+		existingSolicitud := &Solicitud{ID: 999, Titulo: "Original"}
+		repo.On("GetByID", ctx, uint(999)).Return(existingSolicitud, nil)
 		expectedError := errors.New("error en actualización")
 		repo.On("Update", ctx, uint(999), updateReq).Return(expectedError)
 
@@ -368,6 +534,9 @@ func TestService_Update(t *testing.T) {
 		repo := new(mockRepository)
 		docClient := new(mockDocumentoClient)
 
+		// Mock para verificar que existe la solicitud
+		existingSolicitud := &Solicitud{ID: 1, Titulo: "Original"}
+		repo.On("GetByID", ctx, uint(1)).Return(existingSolicitud, nil)
 		repo.On("Update", ctx, uint(1), updateReq).Return(nil)
 
 		service := NewService(repo, logger, docClient)
@@ -390,6 +559,9 @@ func TestService_Delete(t *testing.T) {
 		repo := new(mockRepository)
 		docClient := new(mockDocumentoClient)
 
+		// Mock para verificar que existe la solicitud
+		existingSolicitud := &Solicitud{ID: 1, Titulo: "Original"}
+		repo.On("GetByID", ctx, uint(1)).Return(existingSolicitud, nil)
 		repo.On("Delete", ctx, uint(1)).Return(nil)
 
 		service := NewService(repo, logger, docClient)
@@ -408,7 +580,7 @@ func TestService_Delete(t *testing.T) {
 		docClient := new(mockDocumentoClient)
 
 		expectedError := errors.New("solicitud no encontrada")
-		repo.On("Delete", ctx, uint(999)).Return(expectedError)
+		repo.On("GetByID", ctx, uint(999)).Return(nil, expectedError)
 
 		service := NewService(repo, logger, docClient)
 
@@ -426,6 +598,9 @@ func TestService_Delete(t *testing.T) {
 		repo := new(mockRepository)
 		docClient := new(mockDocumentoClient)
 
+		// Mock para verificar que existe la solicitud
+		existingSolicitud := &Solicitud{ID: 1, Titulo: "Original"}
+		repo.On("GetByID", ctx, uint(1)).Return(existingSolicitud, nil)
 		expectedError := errors.New("error de conexión a base de datos")
 		repo.On("Delete", ctx, uint(1)).Return(expectedError)
 
@@ -444,4 +619,9 @@ func TestService_Delete(t *testing.T) {
 // Función auxiliar para crear punteros a strings
 func stringPtr(s string) *string {
 	return &s
+}
+
+// Función auxiliar para crear punteros a uint
+func uintPtr(u uint) *uint {
+	return &u
 }

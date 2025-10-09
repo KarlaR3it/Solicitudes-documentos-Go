@@ -35,7 +35,51 @@ func NewService(repo Repository, logger *log.Logger, docClient DocumentoClient) 
 	}
 }
 
+// validateCreateRequest valida los campos requeridos de la solicitud
+func validateCreateRequest(req CreateReq) error {
+	if req.Titulo == "" {
+		return fmt.Errorf("el título es requerido")
+	}
+	if req.Estado == "" {
+		req.Estado = "pendiente" // Valor por defecto
+	}
+	if req.Area == "" {
+		return fmt.Errorf("el área es requerida")
+	}
+	if req.Pais == "" {
+		return fmt.Errorf("el país es requerido")
+	}
+	if req.Localizacion == "" {
+		return fmt.Errorf("la localización es requerida")
+	}
+	if req.FechaInicioProyecto == "" {
+		return fmt.Errorf("la fecha de inicio del proyecto es requerida")
+	}
+	if req.UsuarioID == nil {
+		return fmt.Errorf("el ID de usuario es requerido")
+	}
+
+	// Validar formato de fecha
+	_, err := time.Parse("2006-01-02", req.FechaInicioProyecto)
+	if err != nil {
+		return fmt.Errorf("formato de fecha inválido, debe ser YYYY-MM-DD")
+	}
+
+	// Validar rango de renta
+	if req.RentaDesde > 0 && req.RentaHasta > 0 && req.RentaDesde > req.RentaHasta {
+		return fmt.Errorf("el rango de renta es inválido")
+	}
+
+	return nil
+}
+
 func (s *service) Create(ctx context.Context, req CreateReq) (*Solicitud, error) {
+	// Validar campos requeridos
+	if err := validateCreateRequest(req); err != nil {
+		s.logger.Printf("Validación fallida: %v", err)
+		return nil, err
+	}
+
 	// Parsear la fecha de string a time.Time
 	fechaInicio, err := time.Parse("2006-01-02", req.FechaInicioProyecto)
 	if err != nil {
@@ -43,9 +87,15 @@ func (s *service) Create(ctx context.Context, req CreateReq) (*Solicitud, error)
 		return nil, fmt.Errorf("formato de fecha inválido, use YYYY-MM-DD: %v", err)
 	}
 
+	// Establecer valor por defecto para Estado si está vacío
+	estado := req.Estado
+	if estado == "" {
+		estado = "pendiente"
+	}
+
 	solicitud := &Solicitud{
 		Titulo:                   req.Titulo,
-		Estado:                   req.Estado,
+		Estado:                   estado,
 		Area:                     req.Area,
 		Pais:                     req.Pais,
 		Localizacion:             req.Localizacion,

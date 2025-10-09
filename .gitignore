@@ -1,0 +1,136 @@
+# =================================================================
+# 🚀 GITIGNORE PROFESIONAL - MICROSERVICIOS GO
+# =================================================================
+# Proyecto: Sistema de Solicitudes y Documentos
+# Arquitectura: 2 microservicios independientes (Go + MySQL)
+# =================================================================
+
+# =================================================================
+# 📦 BINARIOS Y ARCHIVOS COMPILADOS
+# =================================================================
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+
+# Binarios específicos del proyecto
+main.exe
+solicitud.test.exe
+documento.test.exe
+
+# =================================================================
+# 🧪 TESTING Y COBERTURA
+# =================================================================
+coverage.out
+coverage.html
+coverage
+*.prof
+*.pprof
+
+# =================================================================
+# 📁 DEPENDENCIAS Y VENDORS
+# =================================================================
+vendor/
+
+# =================================================================
+# 🔐 CONFIGURACIÓN Y SECRETOS
+# =================================================================
+# Variables de entorno (mantener .env.example)
+.env
+.env.local
+.env.*.local
+
+# Certificados y claves de seguridad
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Configuración sensible
+secrets.yaml
+secrets.json
+
+# =================================================================
+# 📝 LOGS Y ARCHIVOS TEMPORALES
+# =================================================================
+*.log
+logs/
+*.orig
+*.tmp
+
+# =================================================================
+# 💾 BASE DE DATOS Y DOCKER
+# =================================================================
+# Volúmenes persistentes de Docker
+**/data/
+**/mysql_data/
+
+# Backups de base de datos
+*.sql.backup
+*.dump
+
+# =================================================================
+# 💻 IDEs Y EDITORES
+# =================================================================
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# GoLand/IntelliJ
+.idea/
+*.iml
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+
+# =================================================================
+# 🖥️ SISTEMA OPERATIVO
+# =================================================================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+
+# =================================================================
+# 🌐 HERRAMIENTAS ADICIONALES
+# =================================================================
+# Node.js (para herramientas de desarrollo)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =================================================================
+# ✅ ARCHIVOS ESENCIALES INCLUIDOS (NO IGNORAR)
+# =================================================================
+# Los siguientes archivos son necesarios para compilar el proyecto:
+# 
+# ✅ go.work          - Configuración del workspace Go
+# ✅ go.mod/go.sum    - Dependencias de ambos microservicios
+# ✅ Makefile         - Comandos de automatización (solicitudes)
+# ✅ docker-compose.yml - Configuración de bases de datos MySQL
+# ✅ .env.example     - Plantilla de configuración
+# ✅ cmd/main.go      - Puntos de entrada de ambos servicios
+# ✅ internal/        - Código fuente de la lógica de negocio
+# ✅ pkg/             - Bibliotecas compartidas
+# =================================================================

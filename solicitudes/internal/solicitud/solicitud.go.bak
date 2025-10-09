@@ -70,16 +70,6 @@ type Solicitud struct {
 
 // ToResponse convierte una Solicitud a SolicitudResponse
 func (s *Solicitud) ToResponse() SolicitudResponse {
-	// Convertir documentos a DocumentoResponse
-	documentosResponse := make([]DocumentoResponse, len(s.Documentos))
-	for i, doc := range s.Documentos {
-		documentosResponse[i] = DocumentoResponse{
-			ID:            doc.ID,
-			NombreArchivo: doc.NombreArchivo,
-			Extension:     doc.Extension,
-		}
-	}
-
 	return SolicitudResponse{
 		ID:                       s.ID,
 		Titulo:                   s.Titulo,
@@ -99,11 +89,6 @@ func (s *Solicitud) ToResponse() SolicitudResponse {
 		FechaInicioProyecto:      s.FechaInicioProyecto,
 		CreatedAt:                s.CreatedAt,
 		UpdatedAt:                s.UpdatedAt,
-		UsuarioID:                s.UsuarioID,
-		Documentos:               documentosResponse,
-	}
-}
-
 // TableName especifica el nombre de la tabla
 func (Solicitud) TableName() string {
 	return "solicitudes"

@@ -1,25 +1,64 @@
-.PHONY: install start test cover clean
+# Variables
+BINARY_NAME=solicitudes
+TEST_PACKAGE=.\internal\solicitud\...
+COVERAGE_FILE=coverage.out
+COVERAGE_HTML=coverage.html
 
-# Instalacion y configuracion
+# Colores para Windows (sin códigos ANSI para evitar problemas)
+GREEN=[92m
+YELLOW=[93m
+WHITE=[97m
+RED=[91m
+RESET=[0m
+
+.PHONY: help install start test test-cover cover clean
+
+## Help: Muestra esta ayuda
+help:
+	@echo.
+	@echo Uso:
+	@echo   make ^<target^>
+	@echo.
+	@echo Targets:
+	@powershell -Command "Select-String -Pattern '^##.*$$' $(MAKEFILE_LIST) | ForEach-Object { $$_ -replace '##[ ]*','' } | ForEach-Object { $$parts = $$_ -split ':',2; '  {0,-15}{1}' -f $$parts[0], $$parts[1] }"
+
+## Instalación: Instala dependencias y levanta los servicios
 install:
-	go mod tidy
-	docker compose up -d
+	@echo Instalando dependencias...
+	@go mod tidy
+	@echo Iniciando servicios con Docker...
+	@docker compose up -d
 
-# Ejecutar aplicacion
+## Iniciar: Ejecuta la aplicación
 start:
-	go run cmd/main.go
+	@echo Iniciando la aplicación...
+	@go run cmd/main.go
 
-# Ejecutar tests
+## Test: Ejecuta todas las pruebas
 test:
-	go test ./internal/solicitud -v
+	@echo Ejecutando pruebas...
+	@go test -v $(TEST_PACKAGE)
 
-# Coverage de endpoints (>75% requerido)
-cover: clean
-	go test ./internal/solicitud -coverprofile=coverage.out -covermode=count
-	go tool cover -html=coverage.out -o coverage.html
-	go tool cover -func=coverage.out
+## Test-cover: Ejecuta pruebas con cobertura y genera reporte HTML
+test-cover: clean
+	@echo Ejecutando pruebas con cobertura...
+	@go test -v -coverprofile=$(COVERAGE_FILE) -covermode=atomic $(TEST_PACKAGE)
+	@if exist $(COVERAGE_FILE) ( \
+		echo Generando reporte de cobertura... & \
+		go tool cover -html=$(COVERAGE_FILE) -o $(COVERAGE_HTML) & \
+		echo Resumen de cobertura: & \
+		go tool cover -func=$(COVERAGE_FILE) | findstr /C:"total:" \
+	) else ( \
+		echo Error: No se generaron datos de cobertura & \
+		exit /b 1 \
+	)
 
-# Limpiar archivos temporales
+## Cover: Alias para test-cover
+cover: test-cover
+
+## Clean: Elimina archivos temporales
 clean:
-	@if exist coverage.out del coverage.out 2>nul
-	@if exist coverage.html del coverage.html 2>nul
+	@echo Limpiando archivos temporales...
+	@if exist $(COVERAGE_FILE) del /q $(COVERAGE_FILE) 2>nul
+	@if exist $(COVERAGE_HTML) del /q $(COVERAGE_HTML) 2>nul
+	@echo Limpieza completada

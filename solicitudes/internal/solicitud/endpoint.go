@@ -142,6 +142,32 @@ func (e *Endpoint) Update(c *gin.Context) {
 		}
 	}
 
+	// Validar que solo se envíen campos válidos
+	validFields := map[string]bool{
+		"titulo":                    true,
+		"estado":                    true,
+		"area":                      true,
+		"pais":                      true,
+		"localizacion":              true,
+		"numero_vacantes":           true,
+		"descripcion":               true,
+		"base_educacional":          true,
+		"conocimientos_excluyentes": true,
+		"renta_desde":               true,
+		"renta_hasta":               true,
+		"modalidad_trabajo":         true,
+		"tipo_servicio":             true,
+		"nivel_experiencia":         true,
+		"fecha_inicio_proyecto":     true,
+	}
+
+	for field := range rawBody {
+		if !validFields[field] {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Campo '" + field + "' no es válido"})
+			return
+		}
+	}
+
 	// Parsear con la estructura correcta
 	var req UpdateReq
 	if err := json.Unmarshal(bodyBytes, &req); err != nil {

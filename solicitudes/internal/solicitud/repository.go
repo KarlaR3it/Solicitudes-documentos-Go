@@ -128,5 +128,7 @@ func (r *repository) Update(ctx context.Context, id uint, req UpdateReq) error {
 }
 
 func (r *repository) Delete(ctx context.Context, id uint) error {
+	// Usamos Delete de GORM que manejará automáticamente el soft delete
+	// ya que el modelo Solicitud tiene el campo DeletedAt de tipo gorm.DeletedAt
 	return r.db.WithContext(ctx).Delete(&Solicitud{}, id).Error
 }
