@@ -12,6 +12,7 @@ type Repository interface {
 	GetByID(ctx context.Context, id uint) (*Documento, error)
 	Update(ctx context.Context, id uint, req UpdateReq) error
 	Delete(ctx context.Context, id uint) error
+	DeleteBySolicitudID(ctx context.Context, solicitudID uint) error
 }
 
 type repository struct {
@@ -77,5 +78,11 @@ func (r *repository) Update(ctx context.Context, id uint, req UpdateReq) error {
 }
 
 func (r *repository) Delete(ctx context.Context, id uint) error {
+	// Soft delete: GORM automáticamente establece deleted_at
 	return r.db.WithContext(ctx).Delete(&Documento{}, id).Error
+}
+
+func (r *repository) DeleteBySolicitudID(ctx context.Context, solicitudID uint) error {
+	// Soft delete de todos los documentos asociados a una solicitud
+	return r.db.WithContext(ctx).Where("solicitud_id = ?", solicitudID).Delete(&Documento{}).Error
 }

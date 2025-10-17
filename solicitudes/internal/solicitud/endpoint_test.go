@@ -332,6 +332,7 @@ func TestEndpoint_Delete_NotFound(t *testing.T) {
 
 	// Service.Delete checks existence then calls repo.Delete; simulate existence ok then delete error
 	repo.On("GetByID", mock.Anything, uint(10)).Return(&Solicitud{ID: 10}, nil)
+	docClient.On("DeleteBySolicitudID", uint(10)).Return(nil)
 	repo.On("Delete", mock.Anything, uint(10)).Return(assert.AnError)
 
 	req := httptest.NewRequest(http.MethodDelete, "/solicitudes/10", nil)
@@ -341,6 +342,7 @@ func TestEndpoint_Delete_NotFound(t *testing.T) {
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	repo.AssertExpectations(t)
+	docClient.AssertExpectations(t)
 }
 
 func TestEndpoint_Delete_Success(t *testing.T) {
@@ -356,6 +358,7 @@ func TestEndpoint_Delete_Success(t *testing.T) {
 	r.DELETE("/solicitudes/:id", ep.Delete)
 
 	repo.On("GetByID", mock.Anything, uint(3)).Return(&Solicitud{ID: 3}, nil)
+	docClient.On("DeleteBySolicitudID", uint(3)).Return(nil)
 	repo.On("Delete", mock.Anything, uint(3)).Return(nil)
 
 	req := httptest.NewRequest(http.MethodDelete, "/solicitudes/3", nil)
@@ -365,6 +368,7 @@ func TestEndpoint_Delete_Success(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	repo.AssertExpectations(t)
+	docClient.AssertExpectations(t)
 }
 
 func TestEndpoint_Update_InvalidJSON(t *testing.T) {

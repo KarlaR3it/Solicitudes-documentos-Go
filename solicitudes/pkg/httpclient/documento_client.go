@@ -82,3 +82,32 @@ func (c *DocumentoClient) GetBySolicitudID(solicitudID uint) ([]solicitud.Docume
 
 	return documentos, nil
 }
+
+// DeleteBySolicitudID elimina (soft delete) todos los documentos asociados a una solicitud
+func (c *DocumentoClient) DeleteBySolicitudID(solicitudID uint) error {
+	// Construir la URL para eliminar los documentos de la solicitud
+	url := fmt.Sprintf("%s/documentos/solicitud/%d", c.baseURL, solicitudID)
+	
+	// Realizar la petición HTTP DELETE
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		return fmt.Errorf("error al crear la petición: %v", err)
+	}
+
+	// Configurar headers
+	req.Header.Set("Content-Type", "application/json")
+
+	// Realizar la petición
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("error al conectar con el servicio de documentos: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// Verificar el código de estado
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("error al eliminar documentos: status %d", resp.StatusCode)
+	}
+
+	return nil
+}

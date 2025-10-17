@@ -1,15 +1,20 @@
 package documento
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Documento struct {
-	ID            uint      `gorm:"primaryKey;autoIncrement" json:"id"`
-	Extension     string    `gorm:"type:varchar(5);not null" json:"extension"`
-	NombreArchivo string    `gorm:"type:varchar(255);not null" json:"nombre_archivo"`
-	CreatedAt     time.Time `gorm:"autoCreateTime" json:"created_at"`
-	UpdatedAt     time.Time `gorm:"autoUpdateTime" json:"updated_at"`
-	// CASCADE: Cuando se elimine una solicitud, se eliminarán automáticamente todos sus documentos
-	SolicitudID uint `gorm:"not null;constraint:OnDelete:CASCADE" json:"-"`
+	ID            uint           `gorm:"primaryKey;autoIncrement" json:"id"`
+	Extension     string         `gorm:"type:varchar(5);not null" json:"extension"`
+	NombreArchivo string         `gorm:"type:varchar(255);not null" json:"nombre_archivo"`
+	CreatedAt     time.Time      `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt     time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
+	DeletedAt     gorm.DeletedAt `gorm:"index" json:"-"`
+	// Cuando se elimine una solicitud (soft delete), los documentos asociados también se marcarán como eliminados
+	SolicitudID uint `gorm:"not null" json:"-"`
 }
 
 // DocumentoResponse es la estructura de respuesta para los documentos

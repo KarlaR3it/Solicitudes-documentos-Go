@@ -24,6 +24,11 @@ func (m *mockDocumentoClient) GetBySolicitudID(solicitudID uint) ([]Documento, e
 	return args.Get(0).([]Documento), args.Error(1)
 }
 
+func (m *mockDocumentoClient) DeleteBySolicitudID(solicitudID uint) error {
+	args := m.Called(solicitudID)
+	return args.Error(0)
+}
+
 func TestService_GetAll(t *testing.T) {
 	ctx := context.Background()
 	logger := log.New(os.Stdout, "TEST: ", log.LstdFlags)
@@ -562,6 +567,7 @@ func TestService_Delete(t *testing.T) {
 		// Mock para verificar que existe la solicitud
 		existingSolicitud := &Solicitud{ID: 1, Titulo: "Original"}
 		repo.On("GetByID", ctx, uint(1)).Return(existingSolicitud, nil)
+		docClient.On("DeleteBySolicitudID", uint(1)).Return(nil)
 		repo.On("Delete", ctx, uint(1)).Return(nil)
 
 		service := NewService(repo, logger, docClient)
@@ -572,6 +578,7 @@ func TestService_Delete(t *testing.T) {
 		// Assert
 		assert.NoError(t, err)
 		repo.AssertExpectations(t)
+		docClient.AssertExpectations(t)
 	})
 
 	t.Run("debe retornar error cuando no encuentra solicitud para eliminar", func(t *testing.T) {
@@ -601,7 +608,9 @@ func TestService_Delete(t *testing.T) {
 		// Mock para verificar que existe la solicitud
 		existingSolicitud := &Solicitud{ID: 1, Titulo: "Original"}
 		repo.On("GetByID", ctx, uint(1)).Return(existingSolicitud, nil)
-		expectedError := errors.New("error de conexión a base de datos")
+		docClient.On("DeleteBySolicitudID", uint(1)).Return(nil)
+
+		expectedError := errors.New("error de base de datos")
 		repo.On("Delete", ctx, uint(1)).Return(expectedError)
 
 		service := NewService(repo, logger, docClient)
@@ -611,8 +620,35 @@ func TestService_Delete(t *testing.T) {
 
 		// Assert
 		assert.Error(t, err)
-		assert.EqualError(t, err, "error de conexión a base de datos")
+		assert.Equal(t, expectedError, err)
 		repo.AssertExpectations(t)
+		docClient.AssertExpectations(t)
+	})
+
+	t.Run("debe continuar eliminando solicitud aunque falle eliminación de documentos", func(t *testing.T) {
+		// Arrange
+		repo := new(mockRepository)
+		docClient := new(mockDocumentoClient)
+
+		// Mock para verificar que existe la solicitud
+		existingSolicitud := &Solicitud{ID: 1, Titulo: "Original"}
+		repo.On("GetByID", ctx, uint(1)).Return(existingSolicitud, nil)
+		
+		// Simular que falla la eliminación de documentos
+		docClient.On("DeleteBySolicitudID", uint(1)).Return(errors.New("error al eliminar documentos"))
+		
+		// Pero la solicitud se elimina exitosamente
+		repo.On("Delete", ctx, uint(1)).Return(nil)
+
+		service := NewService(repo, logger, docClient)
+
+		// Act
+		err := service.Delete(ctx, 1)
+
+		// Assert
+		assert.NoError(t, err) // No debe retornar error aunque fallen los documentos
+		repo.AssertExpectations(t)
+		docClient.AssertExpectations(t)
 	})
 }
 

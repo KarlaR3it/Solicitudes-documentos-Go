@@ -14,6 +14,7 @@ type Service interface {
 	GetByID(ctx context.Context, id uint) (*DocumentoResponse, error)
 	Update(ctx context.Context, id uint, req UpdateReq) error
 	Delete(ctx context.Context, id uint) error
+	DeleteBySolicitudID(ctx context.Context, solicitudID uint) error
 }
 
 type service struct {
@@ -160,5 +161,17 @@ func (s *service) Delete(ctx context.Context, id uint) error {
 	}
 
 	s.logger.Printf("Documento eliminado exitosamente: ID=%d", id)
+	return nil
+}
+
+func (s *service) DeleteBySolicitudID(ctx context.Context, solicitudID uint) error {
+	s.logger.Printf("Eliminando documentos asociados a la solicitud ID=%d", solicitudID)
+	
+	if err := s.repo.DeleteBySolicitudID(ctx, solicitudID); err != nil {
+		s.logger.Printf("Error al eliminar documentos de la solicitud ID=%d: %v", solicitudID, err)
+		return err
+	}
+
+	s.logger.Printf("Documentos eliminados exitosamente para la solicitud ID=%d", solicitudID)
 	return nil
 }

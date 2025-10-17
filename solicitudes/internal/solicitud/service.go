@@ -19,6 +19,7 @@ type Service interface {
 // DocumentoClient define la interfaz para el cliente de documentos
 type DocumentoClient interface {
 	GetBySolicitudID(solicitudID uint) ([]Documento, error)
+	DeleteBySolicitudID(solicitudID uint) error
 }
 
 type service struct {
@@ -156,9 +157,6 @@ func (s *service) GetAll(ctx context.Context, filter GetAllReq) ([]SolicitudResp
 
 	s.logger.Printf("Se obtuvieron %d solicitudes", len(responses))
 	return responses, nil
-
-	s.logger.Printf("Se obtuvieron %d solicitudes", len(responses))
-	return responses, nil
 }
 
 func (s *service) GetByID(ctx context.Context, id uint) (*SolicitudResponse, error) {
@@ -229,6 +227,15 @@ func (s *service) Delete(ctx context.Context, id uint) error {
 		return fmt.Errorf("solicitud no encontrada")
 	}
 
+	// Primero eliminar (soft delete) los documentos asociados
+	if err := s.documentoClient.DeleteBySolicitudID(uint(id)); err != nil {
+		s.logger.Printf("Advertencia: Error al eliminar documentos de la solicitud ID=%d: %v", id, err)
+		// Continuamos con la eliminación de la solicitud aunque falle la eliminación de documentos
+	} else {
+		s.logger.Printf("Documentos de la solicitud ID=%d eliminados exitosamente", id)
+	}
+
+	// Luego eliminar (soft delete) la solicitud
 	if err := s.repo.Delete(ctx, id); err != nil {
 		s.logger.Printf("Error al eliminar la solicitud ID=%d: %v", id, err)
 		return err

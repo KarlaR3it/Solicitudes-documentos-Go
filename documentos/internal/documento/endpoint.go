@@ -1,6 +1,7 @@
 package documento
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -19,8 +20,18 @@ func NewEndpoint(service Service) *Endpoint {
 // Create maneja POST /documentos
 func (e *Endpoint) Create(c *gin.Context) {
 	var req CreateReq
-	if err := c.ShouldBindJSON(&req); err != nil {
+	// Configurar decoder para rechazar campos desconocidos
+	decoder := json.NewDecoder(c.Request.Body)
+	decoder.DisallowUnknownFields()
+	
+	if err := decoder.Decode(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	
+	// Validar campos requeridos manualmente
+	if req.Extension == "" || req.NombreArchivo == "" || req.SolicitudID == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Todos los campos son requeridos"})
 		return
 	}
 
@@ -90,7 +101,7 @@ func (e *Endpoint) Update(c *gin.Context) {
 		return
 	}
 
-	// Validar campos prohibidos
+	// Validar campos prohibidos y desconocidos
 	var rawReq map[string]interface{}
 	if err := c.ShouldBindJSON(&rawReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -102,6 +113,20 @@ func (e *Endpoint) Update(c *gin.Context) {
 	for _, field := range forbiddenFields {
 		if _, exists := rawReq[field]; exists {
 			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Campo '%s' no puede ser actualizado", field)})
+			return
+		}
+	}
+
+	// Lista de campos permitidos
+	allowedFields := map[string]bool{
+		"extension":      true,
+		"nombre_archivo": true,
+	}
+
+	// Validar que no haya campos desconocidos
+	for field := range rawReq {
+		if !allowedFields[field] {
+			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Campo '%s' no es válido", field)})
 			return
 		}
 	}
@@ -139,4 +164,19 @@ func (e *Endpoint) Delete(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Documento eliminado exitosamente"})
+}
+
+// DeleteBySolicitudID maneja DELETE /documentos/solicitud/:solicitud_id
+func (e *Endpoint) DeleteBySolicitudID(c *gin.Context) {
+	solicitudID, err := strconv.ParseUint(c.Param("solicitud_id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de solicitud inválido"})
+		return
+	}
+
+	if err := e.service.DeleteBySolicitudID(c.Request.Context(), uint(solicitudID)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Documentos eliminados exitosamente"})
 }

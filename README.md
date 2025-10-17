@@ -1,19 +1,27 @@
-# Sistema para Gestionar Solicitudes y Documentos
+# Sistema de Gestión de Solicitudes y Documentos
 
 > **Arquitectura de microservicios independientes para gestión de solicitudes de trabajo y documentos adjuntos**
 
-Este repositorio contiene un microservicio para **Solicitudes** y un microservicio para **Documentos**.
+## 📋 ¿Qué es este proyecto?
 
-Una solicitud puede tener uno o más documentos adjuntos.
+Este repositorio contiene **dos microservicios independientes** desarrollados en **Go** que trabajan en conjunto para gestionar solicitudes de trabajo y sus documentos adjuntos:
 
-## ¿Qué es este proyecto?
+### 🎯 Microservicios
 
-Este repositorio contiene **dos microservicios independientes** desarrollados en Go que trabajan en conjunto:
+| Microservicio | Puerto | Descripción | Base de Datos |
+|--------------|--------|-------------|---------------|
+| **Solicitudes** | 8082 | Gestiona solicitudes de trabajo (CRUD completo) | MySQL (puerto 3009) |
+| **Documentos** | 8083 | Gestiona documentos adjuntos a las solicitudes | MySQL (puerto 3010) |
 
-- **Microservicio Solicitudes** - Gestiona solicitudes de trabajo (crear, actualizar, consultar, eliminar) - Puerto: 8082
-- **Microservicio Documentos** - Gestiona documentos adjuntos asociados a las solicitudes - Puerto: 8083
+### 🔗 Características principales
 
-Los microservicios se comunican entre sí mediante HTTP REST APIs y cada uno mantiene su propia base de datos MySQL.
+- ✅ **Arquitectura de microservicios** - Servicios independientes y desacoplados
+- ✅ **Comunicación HTTP REST** - Los microservicios se comunican mediante APIs REST
+- ✅ **Soft Delete** - Los registros no se eliminan físicamente, se marcan con `deleted_at`
+- ✅ **Eliminación en cascada** - Al eliminar una solicitud, sus documentos también se marcan como eliminados
+- ✅ **CORS habilitado** - Listo para consumir desde frontend (Vue.js, React, etc.)
+- ✅ **Validación de datos** - Validación estricta de campos y tipos de datos
+- ✅ **Tests unitarios** - Cobertura del 87.0% en el microservicio de Solicitudes
 
 ## Arquitectura del Sistema
 
@@ -25,25 +33,27 @@ Solicitudes (Puerto 8082)  -----HTTP-----> Documentos (Puerto 8083)
 MySQL DB (solicitudes)                    MySQL DB (documentos)
 ```
 
-## Cómo ejecutar el proyecto
+## 🚀 Cómo ejecutar el proyecto
 
-### Prerrequisitos
+### 📋 Prerrequisitos
 
-### Prerrequisitos- [Go](https://golang.org/dl/) 1.20 o superior
+Asegúrate de tener instalado lo siguiente en tu máquina:
 
-- **Go 1.20+** - [Descargar aquí](https://golang.org/dl/)- [Docker](https://www.docker.com/products/docker-desktop) 20.10 o superior
-
+- **Go 1.20+** - [Descargar aquí](https://golang.org/dl/)
 - **Docker & Docker Compose** - [Descargar aquí](https://www.docker.com/products/docker-desktop)
 - **Git** - [Descargar aquí](https://git-scm.com/downloads)
+- **Make** (opcional, pero recomendado para Windows) - [Descargar aquí](https://gnuwin32.sourceforge.net/packages/make.htm)
 
-### Clonar el repositorio
+### 1️⃣ Clonar el repositorio
 
 ```bash
 git clone https://github.com/KarlaR3it/Solicitudes-documentos-Go.git
 cd Solicitudes-documentos-Go
 ```
 
-### Ejecutar el microservicio de Solicitudes
+### 2️⃣ Ejecutar el microservicio de Solicitudes
+
+Abre una terminal y ejecuta:
 
 ```bash
 cd solicitudes
@@ -51,22 +61,36 @@ make install    # Instala dependencias y levanta MySQL con Docker
 make start      # Inicia el servidor en puerto 8082
 ```
 
-**Nota:** El microservicio de Solicitudes tiene un `Makefile` configurado, por lo que puedes usar comandos `make`.
+**✅ Comandos disponibles con Makefile:**
+- `make help` - Ver todos los comandos disponibles
+- `make install` - Instalar dependencias y levantar Docker
+- `make start` - Iniciar el servidor
+- `make test` - Ejecutar pruebas unitarias
+- `make test-cover` - Ejecutar pruebas con reporte de cobertura
 
-### Ejecutar el microservicio de Documentos (en otra terminal)
+### 3️⃣ Ejecutar el microservicio de Documentos
+
+Abre **otra terminal** y ejecuta:
 
 ```bash
 cd documentos
-docker compose up -d        # Levanta MySQL con Docker
-go run cmd/main.go         # Inicia el servidor en puerto 8083
+make install    # Instala dependencias y levanta MySQL con Docker
+make start      # Inicia el servidor en puerto 8083
 ```
 
-**Nota:** El microservicio de Documentos NO tiene `Makefile`, usa comandos directos de Go.
+**✅ Comandos disponibles con Makefile:**
+- `make help` - Ver todos los comandos disponibles
+- `make install` - Instalar dependencias y levantar Docker
+- `make start` - Iniciar el servidor
 
-### 4️⃣ Verificar que funciona
+### 4️⃣ Verificar que todo funciona
+
+Abre tu navegador o Postman y verifica:
 
 - **Solicitudes**: http://localhost:8082/solicitudes
 - **Documentos**: http://localhost:8083/documentos
+
+Si ves una respuesta JSON (aunque sea vacía `[]`), ¡todo está funcionando correctamente! ✅
 
 ## 🧪 Cómo ejecutar las pruebas
 
@@ -95,16 +119,16 @@ Después de ejecutar `make test-cover`, se genera automáticamente:
 
 ## 📊 ¿Qué cubren las pruebas?
 
-**Cobertura actual: 87.6%** ✅ (Meta: >75%)
+**Cobertura actual: 87.0%** ✅ (Meta: >75%)
 
 ### **🎯 Capas Probadas**
 
 | **Capa**          | **Tests** | **Cobertura** | **Descripción**                       |
 | ----------------- | --------- | ------------- | ------------------------------------- |
-| **🌐 Endpoints**  | 16 tests  | 77.2%         | Controladores HTTP (handlers) con Gin |
-| **⚙️ Services**   | 21 tests  | 94.7%         | Lógica de negocio y validaciones      |
-| **🗄️ Repository** | 13 tests  | 90.5%         | Acceso a datos con GORM + sqlmock     |
-| **📦 Models**     | 2 tests   | 80.0%         | Métodos de dominio y conversión       |
+| **🌐 Endpoints**  | 16 tests  | ~77%          | Controladores HTTP (handlers) con Gin |
+| **⚙️ Services**   | 22 tests  | ~95%          | Lógica de negocio y validaciones      |
+| **🗄️ Repository** | 13 tests  | ~91%          | Acceso a datos con GORM + sqlmock     |
+| **📦 Models**     | 2 tests   | ~80%          | Métodos de dominio y conversión       |
 
 ### **🔍 Operaciones CRUD Probadas**
 
@@ -140,6 +164,8 @@ Después de ejecutar `make test-cover`, se genera automáticamente:
 - ❌ ID inválido (400)
 - ❌ No encontrado (500)
 - ✅ Soft delete con GORM
+- ✅ Eliminación en cascada de documentos
+- ✅ Continúa aunque falle eliminación de documentos
 
 ### **🛡️ Validaciones de Negocio Probadas**
 
@@ -165,31 +191,220 @@ Después de ejecutar `make test-cover`, se genera automáticamente:
 
 ```
 Solicitudes-documentos-Go/
-├── solicitudes/              # 📋 Microservicio Solicitudes
-│   ├── cmd/main.go          # Punto de entrada
-│   ├── internal/solicitud/   # Lógica de negocio
-│   │   ├── endpoint.go      # 🌐 HTTP handlers
-│   │   ├── service.go       # ⚙️ Lógica de negocio
-│   │   ├── repository.go    # 🗄️ Acceso a datos
-│   │   ├── solicitud.go     # 📦 Modelo de dominio
-│   │   └── *_test.go        # 🧪 Tests unitarios
-│   ├── pkg/                 # Utilidades compartidas
-│   ├── Makefile            # 🔧 Comandos automatizados
-│   ├── docker-compose.yml  # 🐳 MySQL container
-│   └── coverage.html       # 📊 Reporte de cobertura
+├── solicitudes/                    # 📋 Microservicio Solicitudes
+│   ├── cmd/
+│   │   └── main.go                # Punto de entrada
+│   ├── internal/solicitud/        # Lógica de negocio
+│   │   ├── endpoint.go           # 🌐 HTTP handlers (controladores)
+│   │   ├── service.go            # ⚙️ Lógica de negocio y validaciones
+│   │   ├── repository.go         # 🗄️ Acceso a datos (GORM)
+│   │   ├── solicitud.go          # 📦 Modelos de dominio
+│   │   ├── endpoint_test.go      # 🧪 Tests de endpoints
+│   │   ├── service_test.go       # 🧪 Tests de servicios
+│   │   └── repository_test.go    # 🧪 Tests de repositorio
+│   ├── pkg/
+│   │   ├── bootstrap/            # Inicialización (DB, Logger, Env)
+│   │   ├── handler/              # Configuración de rutas
+│   │   └── httpclient/           # Cliente HTTP para Documentos
+│   ├── Makefile                  # 🔧 Comandos automatizados
+│   ├── docker-compose.yml        # 🐳 MySQL container (puerto 3009)
+│   ├── .env                      # Variables de entorno
+│   └── coverage.html             # 📊 Reporte de cobertura
 │
-├── documentos/              # 📄 Microservicio Documentos
-│   ├── cmd/main.go         # Punto de entrada
-│   ├── internal/documento/ # Lógica de negocio
-│   └── docker-compose.yml # 🐳 MySQL container
+├── documentos/                    # 📄 Microservicio Documentos
+│   ├── cmd/
+│   │   └── main.go               # Punto de entrada
+│   ├── internal/documento/       # Lógica de negocio
+│   │   ├── endpoint.go          # 🌐 HTTP handlers
+│   │   ├── service.go           # ⚙️ Lógica de negocio
+│   │   ├── repository.go        # 🗄️ Acceso a datos (GORM)
+│   │   └── documento.go         # 📦 Modelos de dominio
+│   ├── pkg/
+│   │   ├── bootstrap/           # Inicialización (DB, Logger, Env)
+│   │   ├── handler/             # Configuración de rutas
+│   │   └── httpclient/          # Cliente HTTP para Solicitudes
+│   ├── Makefile                 # 🔧 Comandos automatizados
+│   ├── docker-compose.yml       # 🐳 MySQL container (puerto 3010)
+│   └── .env                     # Variables de entorno
 │
-├── go.work                 # Go workspace
-└── README.md              # 📖 Este archivo
+├── go.work                       # Go workspace (multi-módulo)
+└── README.md                     # 📖 Este archivo
 ```
+
+## 🔧 Tecnologías utilizadas
+
+| Tecnología | Versión | Propósito |
+|-----------|---------|-----------|
+| **Go** | 1.20+ | Lenguaje de programación |
+| **Gin** | v1.9+ | Framework web HTTP |
+| **GORM** | v1.25+ | ORM para base de datos |
+| **MySQL** | 8.0+ | Base de datos relacional |
+| **Docker** | 20.10+ | Contenedores para BD |
+| **Testify** | v1.8+ | Framework de testing |
+
+## ❓ Troubleshooting (Solución de problemas)
+
+### Error: "Puerto ya en uso"
+
+Si obtienes un error como `bind: address already in use`:
+
+```bash
+# Windows
+netstat -ano | findstr :8082
+taskkill /PID <PID> /F
+
+# Linux/Mac
+lsof -ti:8082 | xargs kill -9
+```
+
+### Error: "Cannot connect to MySQL"
+
+Verifica que Docker esté corriendo:
+
+```bash
+docker ps
+```
+
+Si no ves los contenedores de MySQL, levántalos:
+
+```bash
+cd solicitudes
+docker compose up -d
+
+cd ../documentos
+docker compose up -d
+```
+
+### Error: "deleted_at column doesn't exist"
+
+Necesitas agregar la columna `deleted_at` a la tabla `documentos`:
+
+```sql
+ALTER TABLE documentos ADD COLUMN deleted_at TIMESTAMP NULL;
+CREATE INDEX idx_documentos_deleted_at ON documentos(deleted_at);
+```
+
+### Los cambios no se reflejan
+
+Asegúrate de reiniciar ambos servicios después de hacer cambios en el código:
+
+1. Detén el servidor (Ctrl+C)
+2. Ejecuta `make start` nuevamente
+
+## 🤝 Contribuir
+
+Si encuentras algún bug o tienes sugerencias:
+
+1. Abre un **Issue** en GitHub
+2. Haz un **Fork** del repositorio
+3. Crea una **rama** con tu feature (`git checkout -b feature/nueva-funcionalidad`)
+4. Haz **commit** de tus cambios (`git commit -m 'Agrega nueva funcionalidad'`)
+5. Haz **push** a la rama (`git push origin feature/nueva-funcionalidad`)
+6. Abre un **Pull Request**
+
+## 📝 Licencia
+
+Este proyecto es de código abierto y está disponible bajo la licencia MIT.
+
+## 👥 Autores
+
+- **Karla Ramírez** - [GitHub](https://github.com/KarlaR3it)
+
+## 🌐 Endpoints API - Operaciones CRUD
+
+### 📋 Solicitudes (Puerto 8082)
+
+| Método | Endpoint | Descripción | Tipo de Eliminación |
+|--------|----------|-------------|---------------------|
+| `GET` | `/solicitudes` | Listar todas las solicitudes (con filtros opcionales) | - |
+| `POST` | `/solicitudes` | Crear nueva solicitud | - |
+| `GET` | `/solicitudes/:id` | Obtener solicitud por ID (sin documentos) | - |
+| `GET` | `/solicitudes/:id/con-documentos` | Obtener solicitud con sus documentos adjuntos | - |
+| `PATCH` | `/solicitudes/:id` | Actualizar solicitud (parcial) | - |
+| `DELETE` | `/solicitudes/:id` | **Eliminar solicitud (Soft Delete)** | ⚠️ **Soft Delete** |
+
+### 📄 Documentos (Puerto 8083)
+
+| Método | Endpoint | Descripción | Tipo de Eliminación |
+|--------|----------|-------------|---------------------|
+| `GET` | `/documentos` | Listar todos los documentos (con filtros opcionales) | - |
+| `POST` | `/documentos` | Crear nuevo documento | - |
+| `GET` | `/documentos/:id` | Obtener documento por ID | - |
+| `PATCH` | `/documentos/:id` | Actualizar documento (parcial) | - |
+| `DELETE` | `/documentos/:id` | **Eliminar documento (Soft Delete)** | ⚠️ **Soft Delete** |
+
+### ⚠️ Importante: Soft Delete
+
+**¿Qué es Soft Delete?**
+
+Cuando eliminas una solicitud o documento usando `DELETE`, **NO se borra físicamente de la base de datos**. En su lugar:
+
+1. ✅ Se marca el registro con una fecha en la columna `deleted_at`
+2. ✅ El registro deja de aparecer en las consultas normales (GET)
+3. ✅ En el frontend, el elemento desaparecerá de la interfaz
+4. ✅ En la base de datos, el registro sigue existiendo pero está marcado como eliminado
+
+**Eliminación en cascada:**
+- Al eliminar una **solicitud**, todos sus **documentos asociados** también se marcan como eliminados automáticamente
+- Esto mantiene la integridad referencial entre ambos microservicios
+
+**Ejemplo en la BD:**
+```sql
+-- Antes de DELETE
+id | titulo | deleted_at
+1  | "Solicitud 1" | NULL
+
+-- Después de DELETE
+id | titulo | deleted_at
+1  | "Solicitud 1" | 2025-10-17 13:45:00
+```
+
+## 🧪 Probar los endpoints
+
+### Opción 1: Postman (Recomendado)
+
+Puedes importar la colección de Postman con todos los endpoints configurados:
+
+📦 **[Descargar colección de Postman](#)** *(Comparte el link de tu colección aquí)*
+
+### Opción 2: cURL
+
+**Crear una solicitud:**
+```bash
+curl -X POST http://localhost:8082/solicitudes \
+  -H "Content-Type: application/json" \
+  -d '{
+    "titulo": "Solicitud de prueba",
+    "estado": "pendiente",
+    "area": "Tecnología",
+    "pais": "México",
+    "localizacion": "CDMX",
+    "rango_renta_desde": 50000,
+    "rango_renta_hasta": 80000,
+    "fecha_inicio_proyecto": "2025-11-01",
+    "usuario_id": 1
+  }'
+```
+
+**Listar solicitudes:**
+```bash
+curl http://localhost:8082/solicitudes
+```
+
+**Eliminar solicitud (Soft Delete):**
+```bash
+curl -X DELETE http://localhost:8082/solicitudes/1
+```
+
+### Opción 3: Frontend Vue.js
+
+Este proyecto está preparado para consumirse desde el frontend desarrollado en Vue 3:
+
+🔗 **[Frontend Vue.js](https://github.com/KarlaR3it/Solicitudes-documentos-Vue.git)**
 
 ## 🛠️ Comandos útiles
 
-### Microservicio Solicitudes (con Makefile)
+### Microservicio Solicitudes
 
 ```bash
 cd solicitudes
@@ -201,30 +416,11 @@ make test-cover     # Ejecutar pruebas con cobertura
 make clean          # Limpiar archivos temporales
 ```
 
-### Microservicio Documentos (sin Makefile)
+### Microservicio Documentos
 
 ```bash
 cd documentos
-docker compose up -d    # Instalar dependencias + Docker
-go run cmd/main.go     # Iniciar servidor
-go test ./...          # Ejecutar pruebas (cuando estén implementadas)
+make help           # Ver todos los comandos disponibles
+make install        # Instalar dependencias + Docker
+make start          # Iniciar servidor
 ```
-
-## 🌐 Endpoints disponibles
-
-### 📋 Solicitudes (Puerto 8082)
-
-- `GET /solicitudes` - Listar todas las solicitudes
-- `POST /solicitudes` - Crear nueva solicitud
-- `GET /solicitudes/{id}` - Obtener solicitud por ID
-- `GET /solicitudes/{id}/con-documentos` - Obtener solicitud con documentos
-- `PATCH /solicitudes/{id}` - Actualizar solicitud
-- `DELETE /solicitudes/{id}` - Eliminar solicitud
-
-### 📄 Documentos (Puerto 8083)
-
-- `GET /documentos` - Listar todos los documentos
-- `POST /documentos` - Crear nuevo documento
-- `GET /documentos/{id}` - Obtener documento por ID
-- `PATCH /documentos/{id}` - Actualizar documento
-- `DELETE /documentos/{id}` - Eliminar documento
