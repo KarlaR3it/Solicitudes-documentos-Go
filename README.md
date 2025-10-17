@@ -275,37 +275,6 @@ cd ../documentos
 docker compose up -d
 ```
 
-### Error: "deleted_at column doesn't exist"
-
-Necesitas agregar la columna `deleted_at` a la tabla `documentos`:
-
-```sql
-ALTER TABLE documentos ADD COLUMN deleted_at TIMESTAMP NULL;
-CREATE INDEX idx_documentos_deleted_at ON documentos(deleted_at);
-```
-
-### Los cambios no se reflejan
-
-Asegúrate de reiniciar ambos servicios después de hacer cambios en el código:
-
-1. Detén el servidor (Ctrl+C)
-2. Ejecuta `make start` nuevamente
-
-## 🤝 Contribuir
-
-Si encuentras algún bug o tienes sugerencias:
-
-1. Abre un **Issue** en GitHub
-2. Haz un **Fork** del repositorio
-3. Crea una **rama** con tu feature (`git checkout -b feature/nueva-funcionalidad`)
-4. Haz **commit** de tus cambios (`git commit -m 'Agrega nueva funcionalidad'`)
-5. Haz **push** a la rama (`git push origin feature/nueva-funcionalidad`)
-6. Abre un **Pull Request**
-
-## 📝 Licencia
-
-Este proyecto es de código abierto y está disponible bajo la licencia MIT.
-
 ## 👥 Autores
 
 - **Karla Ramírez** - [GitHub](https://github.com/KarlaR3it)
